@@ -10,6 +10,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sensitivitySelect = document.getElementById('sensitivitySelect');
   const discreetWarnings = document.getElementById('discreetWarnings');
   const logPreventions = document.getElementById('logPreventions');
+  const autoReplaceEnabled = document.getElementById('autoReplaceEnabled');
+  const replacementSection = document.getElementById('replacementSection');
+  const creditCardReplace = document.getElementById('creditCardReplace');
+  const ssnReplace = document.getElementById('ssnReplace');
+  const emailReplace = document.getElementById('emailReplace');
+  const phoneReplace = document.getElementById('phoneReplace');
+  const apiKeyReplace = document.getElementById('apiKeyReplace');
+  const passwordReplace = document.getElementById('passwordReplace');
   const whitelistInput = document.getElementById('whitelistInput');
   const addWhitelistBtn = document.getElementById('addWhitelistBtn');
   const whitelistItems = document.getElementById('whitelistItems');
@@ -30,6 +38,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   sensitivitySelect.addEventListener('change', handleSettingChange);
   discreetWarnings.addEventListener('change', handleSettingChange);
   logPreventions.addEventListener('change', handleSettingChange);
+  autoReplaceEnabled.addEventListener('change', handleAutoReplaceToggle);
+  creditCardReplace.addEventListener('input', handleReplacementChange);
+  ssnReplace.addEventListener('input', handleReplacementChange);
+  emailReplace.addEventListener('input', handleReplacementChange);
+  phoneReplace.addEventListener('input', handleReplacementChange);
+  apiKeyReplace.addEventListener('input', handleReplacementChange);
+  passwordReplace.addEventListener('input', handleReplacementChange);
   addWhitelistBtn.addEventListener('click', handleAddWhitelist);
   whitelistInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleAddWhitelist();
@@ -65,6 +80,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     sensitivitySelect.value = currentSettings.detectionSensitivity || 'medium';
     discreetWarnings.checked = currentSettings.showDiscreetWarnings !== false;
     logPreventions.checked = currentSettings.logPreventions !== false;
+    
+    // Auto-replace settings
+    const autoReplace = currentSettings.autoReplace || {};
+    autoReplaceEnabled.checked = autoReplace.enabled || false;
+    
+    // Update replacement section visibility
+    if (autoReplace.enabled) {
+      replacementSection.classList.add('show');
+    } else {
+      replacementSection.classList.remove('show');
+    }
+    
+    // Populate replacement values
+    creditCardReplace.value = autoReplace.creditCard || '';
+    ssnReplace.value = autoReplace.ssn || '';
+    emailReplace.value = autoReplace.email || '';
+    phoneReplace.value = autoReplace.phone || '';
+    apiKeyReplace.value = autoReplace.apiKey || '';
+    passwordReplace.value = autoReplace.password || '';
     
     // Whitelist
     updateWhitelistDisplay();
@@ -159,6 +193,63 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (error) {
       console.error('Error updating settings:', error);
+    }
+  }
+
+  // Handle auto-replace toggle
+  async function handleAutoReplaceToggle() {
+    const enabled = autoReplaceEnabled.checked;
+    
+    // Update visibility of replacement section
+    if (enabled) {
+      replacementSection.classList.add('show');
+    } else {
+      replacementSection.classList.remove('show');
+    }
+
+    const autoReplace = currentSettings.autoReplace || {};
+    autoReplace.enabled = enabled;
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: { autoReplace }
+      });
+      
+      if (response.success) {
+        currentSettings.autoReplace = autoReplace;
+      } else {
+        console.error('Failed to update auto-replace setting:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating auto-replace setting:', error);
+    }
+  }
+
+  // Handle replacement value changes
+  async function handleReplacementChange() {
+    const autoReplace = currentSettings.autoReplace || {};
+    
+    autoReplace.creditCard = creditCardReplace.value;
+    autoReplace.ssn = ssnReplace.value;
+    autoReplace.email = emailReplace.value;
+    autoReplace.phone = phoneReplace.value;
+    autoReplace.apiKey = apiKeyReplace.value;
+    autoReplace.password = passwordReplace.value;
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: { autoReplace }
+      });
+      
+      if (response.success) {
+        currentSettings.autoReplace = autoReplace;
+      } else {
+        console.error('Failed to update replacement values:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating replacement values:', error);
     }
   }
 
