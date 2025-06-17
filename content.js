@@ -435,11 +435,15 @@
     }
     pendingPasteEvent = null;
     
-    // Log the prevention
+    // Log the prevention with detailed information
+    const detectedPatterns = analyzeSensitiveData(pendingPasteEvent?.text || '');
     chrome.runtime.sendMessage({
       action: 'logPrevention',
       url: window.location.href,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      detectedPatterns: detectedPatterns,
+      action: 'blocked',
+      contentHash: generateContentHash(pendingPasteEvent?.text || '')
     });
   }
 
@@ -721,6 +725,20 @@
         }
       });
     });
+  }
+
+  // Generate content hash for privacy-preserving logging
+  function generateContentHash(text) {
+    if (!text) return '';
+    
+    // Simple hash function for content fingerprinting without storing actual content
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      const char = text.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return 'hash_' + Math.abs(hash).toString(36);
   }
 
   // Utility function to escape HTML

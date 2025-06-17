@@ -167,6 +167,45 @@
       </div>
     </div>
 
+    <!-- Enterprise Section -->
+    <div class="enterprise-section" id="enterpriseSection">
+      <h3>Enterprise Configuration</h3>
+      <p class="section-description">Advanced settings for team and organizational deployment</p>
+      
+      <div class="setting-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="enterpriseEnabled">
+          <span class="checkmark"></span>
+          Enable enterprise mode
+        </label>
+      </div>
+
+      <div class="enterprise-config" id="enterpriseConfig">
+        <div class="setting-row">
+          <label for="webhookUrl">Webhook URL</label>
+          <input type="url" id="webhookUrl" placeholder="https://your-org.com/webhook">
+        </div>
+        
+        <div class="setting-row">
+          <label for="orgName">Organization Name</label>
+          <input type="text" id="orgName" placeholder="Company Inc.">
+        </div>
+        
+        <div class="setting-row">
+          <label for="teamId">Team ID</label>
+          <input type="text" id="teamId" placeholder="team-123">
+        </div>
+        
+        <div class="setting-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="centralLogging">
+            <span class="checkmark"></span>
+            Enable centralized logging
+          </label>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <div class="footer">
       <button id="clearLogsBtn" class="secondary-btn">Clear Logs</button>

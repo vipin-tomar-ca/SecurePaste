@@ -21,6 +21,23 @@ chrome.runtime.onInstalled.addListener(async () => {
       bitcoin: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
       password: '********',
       devSecret: 'dev_secret_placeholder'
+    },
+    enterprise: {
+      enabled: false,
+      webhookUrl: '',
+      teamId: '',
+      orgName: '',
+      adminEmail: '',
+      centralLogging: false,
+      policyEnforcement: true,
+      customRules: []
+    },
+    logging: {
+      enabled: true,
+      level: 'info', // 'debug', 'info', 'warn', 'error'
+      retentionDays: 30,
+      includeContent: false, // For privacy, don't log actual content
+      webhookEvents: true
     }
   };
 
@@ -73,19 +90,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Log prevention events
 async function handleLogPrevention(message) {
   try {
-    const settings = await chrome.storage.sync.get(['logPreventions']);
+    const settings = await chrome.storage.sync.get(['logPreventions', 'enterprise', 'logging']);
     if (!settings.logPreventions) return;
 
     // Get existing logs
     const result = await chrome.storage.local.get(['preventionLogs']);
     const logs = result.preventionLogs || [];
     
-    // Add new log entry
-    logs.push({
+    // Create comprehensive log entry
+    const logEntry = {
+      id: generateLogId(),
       url: message.url,
       timestamp: message.timestamp,
-      domain: new URL(message.url).hostname
-    });
+      domain: new URL(message.url).hostname,
+      detectedPatterns: message.detectedPatterns || [],
+      action: message.action || 'blocked',
+      severity: calculateSeverity(message.detectedPatterns),
+      userAgent: navigator.userAgent,
+      sessionId: await getSessionId()
+    };
+    
+    // Add content hash if logging level allows (privacy-preserving)
+    if (settings.logging?.includeContent && message.contentHash) {
+      logEntry.contentHash = message.contentHash;
+    }
+    
+    logs.push(logEntry);
     
     // Keep only last 100 entries
     if (logs.length > 100) {
@@ -94,10 +124,102 @@ async function handleLogPrevention(message) {
     
     await chrome.storage.local.set({ preventionLogs: logs });
     
+    // Send to webhook if enterprise mode enabled
+    if (settings.enterprise?.enabled && settings.enterprise?.webhookUrl) {
+      await sendWebhookEvent(logEntry, settings.enterprise);
+    }
+    
     // Update badge
     updateBadge();
   } catch (error) {
     console.error('Failed to log prevention:', error);
+  }
+}
+
+// Send webhook event for enterprise logging
+async function sendWebhookEvent(logEntry, enterpriseSettings) {
+  try {
+    if (!enterpriseSettings.webhookUrl) return;
+    
+    const webhookPayload = {
+      event: 'sensitive_data_detected',
+      timestamp: logEntry.timestamp,
+      organization: enterpriseSettings.orgName || 'Unknown',
+      team_id: enterpriseSettings.teamId || '',
+      user_agent: logEntry.userAgent,
+      domain: logEntry.domain,
+      url: logEntry.url,
+      detected_patterns: logEntry.detectedPatterns,
+      severity: logEntry.severity,
+      action: logEntry.action,
+      session_id: logEntry.sessionId
+    };
+    
+    const response = await fetch(enterpriseSettings.webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'GuardPasteAI-Extension/1.0'
+      },
+      body: JSON.stringify(webhookPayload)
+    });
+    
+    if (!response.ok) {
+      console.warn('Webhook delivery failed:', response.status, response.statusText);
+    }
+  } catch (error) {
+    console.error('Failed to send webhook:', error);
+  }
+}
+
+// Generate unique log ID
+function generateLogId() {
+  return 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Calculate severity based on detected patterns
+function calculateSeverity(detectedPatterns) {
+  if (!detectedPatterns || detectedPatterns.length === 0) return 'low';
+  
+  const severityMap = {
+    creditCard: 'critical',
+    ssn: 'critical',
+    apiKey: 'critical',
+    password: 'critical',
+    devSecret: 'critical',
+    bankAccount: 'high',
+    email: 'medium',
+    phone: 'low',
+    ipAddress: 'low'
+  };
+  
+  let maxSeverity = 'low';
+  const severityLevels = ['low', 'medium', 'high', 'critical'];
+  
+  for (const pattern of detectedPatterns) {
+    const severity = severityMap[pattern.type] || 'low';
+    if (severityLevels.indexOf(severity) > severityLevels.indexOf(maxSeverity)) {
+      maxSeverity = severity;
+    }
+  }
+  
+  return maxSeverity;
+}
+
+// Get or create session ID
+async function getSessionId() {
+  try {
+    const result = await chrome.storage.session.get(['sessionId']);
+    if (result.sessionId) {
+      return result.sessionId;
+    }
+    
+    const newSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    await chrome.storage.session.set({ sessionId: newSessionId });
+    return newSessionId;
+  } catch (error) {
+    // Fallback for browsers that don't support session storage
+    return 'session_' + Date.now();
   }
 }
 

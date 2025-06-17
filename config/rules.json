@@ -1,0 +1,115 @@
+{
+  "version": "1.0",
+  "description": "Sensitive data detection rules for GuardPasteAI",
+  "patterns": [
+    {
+      "id": "email",
+      "label": "Email Address",
+      "description": "Email address detected",
+      "regex": "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",
+      "severity": "medium",
+      "enabled": true
+    },
+    {
+      "id": "creditCard",
+      "label": "Credit Card Number",
+      "description": "Potential credit card number detected",
+      "regex": "\\b(?:4[0-9]{3}|5[1-5][0-9]{2}|3[47][0-9]{2}|6(?:011|5[0-9]{2}))[0-9\\s\\-]{8,16}\\b",
+      "severity": "high",
+      "enabled": true
+    },
+    {
+      "id": "ssn",
+      "label": "Social Security Number",
+      "description": "Potential SSN detected",
+      "regex": "\\b(?:\\d{3}[-\\s]?\\d{2}[-\\s]?\\d{4}|\\d{9})\\b",
+      "severity": "high",
+      "enabled": true
+    },
+    {
+      "id": "apiKey",
+      "label": "API Key/Token",
+      "description": "Potential API key or token detected",
+      "regex": "(?i)(api[_-]?key|token|secret)[\\s:=]+[a-z0-9]{16,}|\\b(?:sk_|pk_|Bearer\\s+)[A-Za-z0-9_-]{16,}\\b",
+      "severity": "critical",
+      "enabled": true
+    },
+    {
+      "id": "phone",
+      "label": "Phone Number",
+      "description": "Phone number detected",
+      "regex": "\\b(?:\\+?1[-.]?)\\(?([0-9]{3})\\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\\b",
+      "severity": "low",
+      "enabled": true
+    },
+    {
+      "id": "bankAccount",
+      "label": "Bank Account Number",
+      "description": "Potential bank account number detected",
+      "regex": "\\b\\d{8,17}\\b",
+      "severity": "high",
+      "enabled": true
+    },
+    {
+      "id": "driversLicense",
+      "label": "Driver's License",
+      "description": "Potential driver's license number detected",
+      "regex": "\\b[A-Z]{1,2}\\d{6,8}\\b|\\b\\d{8,9}\\b",
+      "severity": "medium",
+      "enabled": true
+    },
+    {
+      "id": "ipAddress",
+      "label": "IP Address",
+      "description": "IP address detected",
+      "regex": "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b",
+      "severity": "low",
+      "enabled": true
+    },
+    {
+      "id": "bitcoin",
+      "label": "Bitcoin Address",
+      "description": "Bitcoin wallet address detected",
+      "regex": "\\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\\b|bc1[a-z0-9]{39,59}\\b",
+      "severity": "medium",
+      "enabled": true
+    },
+    {
+      "id": "password",
+      "label": "Password",
+      "description": "Potential password detected",
+      "regex": "\\b(?:password|pwd|pass)[_-]?[:=]\\s*[\"']?[^\\s\"']{8,}[\"']?",
+      "severity": "critical",
+      "enabled": true
+    },
+    {
+      "id": "devSecret",
+      "label": "Development Secret",
+      "description": "Potential development secret or configuration",
+      "regex": "\\b(?:secret|key|token|password)[_-]?[:=]\\s*[\"']?(?:sk_|pk_|Bearer\\s+)?[A-Za-z0-9_-]{16,}[\"']?",
+      "severity": "critical",
+      "enabled": true
+    }
+  ],
+  "domains": [
+    "https://chat.openai.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://bard.google.com/*",
+    "https://poe.com/*",
+    "https://character.ai/*",
+    "https://huggingface.co/*",
+    "https://replicate.com/*",
+    "https://cohere.ai/*",
+    "https://anthropic.com/*",
+    "https://copilot.microsoft.com/*"
+  ],
+  "settings": {
+    "logEvents": true,
+    "showDiscreetWarnings": true,
+    "detectionSensitivity": "medium",
+    "webhookUrl": "",
+    "teamMode": false,
+    "enterpriseConfig": false
+  }
+}
