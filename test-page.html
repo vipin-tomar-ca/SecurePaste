@@ -87,9 +87,59 @@
             margin-top: 20px;
         }
         
+        .generator-demo {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .generator-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .generator-buttons button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        
+        .generator-buttons button:hover {
+            background: #218838;
+        }
+        
+        .generated-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            min-height: 40px;
+            display: none;
+        }
+        
+        .generated-output.show {
+            display: block;
+        }
+        
         @media (max-width: 600px) {
             .feature-demo {
                 grid-template-columns: 1fr;
+            }
+            
+            .generator-buttons {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -183,6 +233,7 @@
         </ul>
     </div>
 
+    <script src="data-generator.js"></script>
     <script>
         // Add some interactivity to demonstrate the page is working
         document.addEventListener('DOMContentLoaded', function() {
@@ -201,6 +252,25 @@
             console.log('Sensitive Data Paste Guard test page loaded');
             console.log('Extension should be active and monitoring paste events');
         });
+
+        // Generator demonstration function
+        function generateAndShow(type) {
+            if (typeof DataGenerator === 'undefined') {
+                document.getElementById('generatedOutput').textContent = 'DataGenerator not available';
+                document.getElementById('generatedOutput').classList.add('show');
+                return;
+            }
+
+            const generated = DataGenerator.generateByType(type);
+            const output = document.getElementById('generatedOutput');
+            output.innerHTML = `<strong>${type.replace(/([A-Z])/g, ' $1').toLowerCase()}:</strong> ${generated}`;
+            output.classList.add('show');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                output.classList.remove('show');
+            }, 5000);
+        }
     </script>
 </body>
 </html>
