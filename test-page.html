@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tool Simulation - Test Sensitive Data Protection</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .test-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        
+        .test-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        
+        .test-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+        }
+        
+        .sample-data {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .sample-data h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+        
+        .sample-data code {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .instructions {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .feature-demo {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ Sensitive Data Paste Guard Test</h1>
+        <p>Test the Chrome extension's new editing capabilities</p>
+    </div>
+    
+    <div class="instructions">
+        <h3>📋 How to Test the New Editing Feature</h3>
+        <ol>
+            <li><strong>Copy sample sensitive data</strong> from the examples below</li>
+            <li><strong>Try to paste</strong> it into any text area on this page</li>
+            <li><strong>Review the warning dialog</strong> that appears with the new editing interface</li>
+            <li><strong>Use the editing tools:</strong>
+                <ul>
+                    <li><code>Highlight Sensitive Data</code> - Marks detected patterns in brackets</li>
+                    <li><code>Remove Sensitive Data</code> - Replaces sensitive info with [REMOVED]</li>
+                    <li><code>Manual editing</code> - Edit the content directly in the text area</li>
+                </ul>
+            </li>
+            <li><strong>Choose your action:</strong>
+                <ul>
+                    <li><code>Cancel</code> - Don't paste anything</li>
+                    <li><code>Paste Edited Content</code> - Paste your modified text</li>
+                    <li><code>Paste Original</code> - Paste the original clipboard content</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="sample-data">
+        <h4>📊 Sample Sensitive Data (Copy and Test)</h4>
+        <p><strong>Credit Card:</strong> <code>4532 1234 5678 9012</code></p>
+        <p><strong>SSN:</strong> <code>123-45-6789</code></p>
+        <p><strong>Email:</strong> <code>john.doe@email.com</code></p>
+        <p><strong>Phone:</strong> <code>(555) 123-4567</code></p>
+        <p><strong>Mixed Example:</strong> <code>My card is 4532123456789012 and SSN is 987-65-4321. Contact me at jane@example.com or (555) 987-6543.</code></p>
+    </div>
+
+    <div class="feature-demo">
+        <div class="test-section">
+            <h3>🤖 AI Chat Simulation</h3>
+            <p>Simulate pasting into an AI tool like ChatGPT:</p>
+            <textarea class="test-input" placeholder="Paste your content here to test the extension's protection and editing features..."></textarea>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Text Input Field</h3>
+            <p>Test with a standard input field:</p>
+            <textarea class="test-input" placeholder="Try pasting sensitive data here..."></textarea>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>✏️ Content Editable Area</h3>
+        <p>Test with a rich text editor simulation:</p>
+        <div contenteditable="true" class="test-input" style="min-height: 100px;">
+            Click here and paste sensitive data to test the extension...
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔧 Extension Features Tested</h3>
+        <ul>
+            <li><strong>Pattern Detection:</strong> Credit cards, SSNs, emails, phone numbers, etc.</li>
+            <li><strong>Interactive Editing:</strong> Modify content before pasting</li>
+            <li><strong>Smart Highlighting:</strong> Visual identification of sensitive patterns</li>
+            <li><strong>Auto-Removal:</strong> Quick removal of all detected sensitive data</li>
+            <li><strong>Flexible Options:</strong> Choose between edited or original content</li>
+            <li><strong>Real-time Analysis:</strong> Re-analyzes content as you edit</li>
+        </ul>
+    </div>
+
+    <script>
+        // Add some interactivity to demonstrate the page is working
+        document.addEventListener('DOMContentLoaded', function() {
+            const textareas = document.querySelectorAll('.test-input');
+            
+            textareas.forEach(textarea => {
+                textarea.addEventListener('focus', function() {
+                    this.style.borderColor = '#007bff';
+                });
+                
+                textarea.addEventListener('blur', function() {
+                    this.style.borderColor = '#dee2e6';
+                });
+            });
+            
+            console.log('Sensitive Data Paste Guard test page loaded');
+            console.log('Extension should be active and monitoring paste events');
+        });
+    </script>
+</body>
+</html>

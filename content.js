@@ -106,18 +106,27 @@
               ).join('')}
             </ul>
             <p class="warning-message">
-              <strong>Are you sure you want to paste this sensitive information into an AI tool?</strong>
+              <strong>Review and edit your content before pasting:</strong>
             </p>
+            <div class="edit-section">
+              <label for="editableContent">Edit your content:</label>
+              <textarea id="editableContent" class="content-editor" placeholder="Your content will appear here...">${escapeHtml(text)}</textarea>
+              <div class="editor-actions">
+                <button class="btn-highlight" onclick="highlightSensitiveData()">Highlight Sensitive Data</button>
+                <button class="btn-clear" onclick="clearSensitiveData()">Remove Sensitive Data</button>
+              </div>
+            </div>
             <div class="preview-section">
               <details>
-                <summary>Preview clipboard content</summary>
-                <div class="text-preview">${escapeHtml(text.substring(0, 200))}${text.length > 200 ? '...' : ''}</div>
+                <summary>View original clipboard content</summary>
+                <div class="text-preview">${escapeHtml(text.substring(0, 500))}${text.length > 500 ? '...' : ''}</div>
               </details>
             </div>
           </div>
           <div class="warning-actions">
-            <button class="btn-cancel" onclick="cancelPaste()">Cancel Paste</button>
-            <button class="btn-proceed" onclick="proceedWithPaste()">Proceed Anyway</button>
+            <button class="btn-cancel" onclick="cancelPaste()">Cancel</button>
+            <button class="btn-proceed-edited" onclick="proceedWithEditedPaste()">Paste Edited Content</button>
+            <button class="btn-proceed" onclick="proceedWithPaste()">Paste Original</button>
           </div>
         </div>
       </div>
@@ -143,9 +152,9 @@
       .warning-dialog {
         background: white;
         border-radius: 12px;
-        max-width: 500px;
+        max-width: 600px;
         width: 90%;
-        max-height: 80vh;
+        max-height: 85vh;
         overflow-y: auto;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         animation: slideIn 0.3s ease-out;
@@ -223,19 +232,88 @@
         word-break: break-all;
       }
       
+      .edit-section {
+        margin: 15px 0;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+      }
+      
+      .edit-section label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #495057;
+      }
+      
+      .content-editor {
+        width: 100%;
+        min-height: 120px;
+        padding: 12px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        resize: vertical;
+        background: white;
+      }
+      
+      .content-editor:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+      
+      .editor-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      
+      .btn-highlight, .btn-clear {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+      
+      .btn-highlight {
+        background: #ffc107;
+        color: #212529;
+      }
+      
+      .btn-highlight:hover {
+        background: #e0a800;
+      }
+      
+      .btn-clear {
+        background: #dc3545;
+        color: white;
+      }
+      
+      .btn-clear:hover {
+        background: #c82333;
+      }
+      
       .warning-actions {
         padding: 0 20px 20px;
         display: flex;
-        gap: 10px;
+        gap: 8px;
         justify-content: flex-end;
       }
       
-      .btn-cancel, .btn-proceed {
-        padding: 10px 20px;
+      .btn-cancel, .btn-proceed, .btn-proceed-edited {
+        padding: 10px 16px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
         font-weight: 600;
+        font-size: 13px;
         transition: background-color 0.2s;
       }
       
@@ -246,6 +324,15 @@
       
       .btn-cancel:hover {
         background: #545b62;
+      }
+      
+      .btn-proceed-edited {
+        background: #28a745;
+        color: white;
+      }
+      
+      .btn-proceed-edited:hover {
+        background: #218838;
       }
       
       .btn-proceed {
@@ -264,6 +351,9 @@
     // Add global functions for button handlers
     window.cancelPaste = cancelPaste;
     window.proceedWithPaste = proceedWithPaste;
+    window.proceedWithEditedPaste = proceedWithEditedPaste;
+    window.highlightSensitiveData = highlightSensitiveData;
+    window.clearSensitiveData = clearSensitiveData;
   }
 
   // Show discreet warning for typed content
@@ -348,25 +438,7 @@
       const target = pendingPasteEvent.target;
       const text = pendingPasteEvent.text;
 
-      // Insert the text
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        const start = target.selectionStart;
-        const end = target.selectionEnd;
-        const value = target.value;
-        target.value = value.slice(0, start) + text + value.slice(end);
-        target.selectionStart = target.selectionEnd = start + text.length;
-      } else if (target.contentEditable === 'true') {
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
-          range.deleteContents();
-          range.insertNode(document.createTextNode(text));
-          range.collapse(false);
-        }
-      }
-
-      // Trigger input event
-      target.dispatchEvent(new Event('input', { bubbles: true }));
+      insertTextAtTarget(target, text);
     }
 
     if (warningDialog) {
@@ -374,6 +446,161 @@
       warningDialog = null;
     }
     pendingPasteEvent = null;
+  }
+
+  // Proceed with edited paste operation
+  function proceedWithEditedPaste() {
+    if (pendingPasteEvent && pendingPasteEvent.target) {
+      const target = pendingPasteEvent.target;
+      const editedText = document.getElementById('editableContent')?.value || '';
+
+      insertTextAtTarget(target, editedText);
+    }
+
+    if (warningDialog) {
+      warningDialog.remove();
+      warningDialog = null;
+    }
+    pendingPasteEvent = null;
+  }
+
+  // Helper function to insert text at target
+  function insertTextAtTarget(target, text) {
+    // Insert the text
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      const start = target.selectionStart;
+      const end = target.selectionEnd;
+      const value = target.value;
+      target.value = value.slice(0, start) + text + value.slice(end);
+      target.selectionStart = target.selectionEnd = start + text.length;
+    } else if (target.contentEditable === 'true') {
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(text));
+        range.collapse(false);
+      }
+    }
+
+    // Trigger input event
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  // Highlight sensitive data in the editor
+  function highlightSensitiveData() {
+    const editor = document.getElementById('editableContent');
+    if (!editor) return;
+
+    const text = editor.value;
+    const detectedPatterns = analyzeSensitiveData(text);
+    
+    if (detectedPatterns.length === 0) {
+      alert('No sensitive data found in the current text.');
+      return;
+    }
+
+    // Create a visual indicator
+    let highlightedText = text;
+    let offset = 0;
+
+    for (const pattern of detectedPatterns) {
+      for (const match of pattern.matches) {
+        const index = highlightedText.indexOf(match, offset);
+        if (index !== -1) {
+          const before = highlightedText.substring(0, index);
+          const after = highlightedText.substring(index + match.length);
+          highlightedText = before + `[${pattern.name.toUpperCase()}: ${match}]` + after;
+          offset = index + match.length + pattern.name.length + 4;
+        }
+      }
+    }
+
+    editor.value = highlightedText;
+    
+    // Show notification
+    const notification = document.createElement('div');
+    notification.textContent = `Highlighted ${detectedPatterns.reduce((sum, p) => sum + p.count, 0)} sensitive data instances`;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #ffc107;
+      color: #212529;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-weight: 500;
+      z-index: 10001;
+      animation: fadeInOut 3s ease-in-out;
+    `;
+    
+    const fadeInOutStyle = document.createElement('style');
+    fadeInOutStyle.textContent = `
+      @keyframes fadeInOut {
+        0%, 100% { opacity: 0; }
+        20%, 80% { opacity: 1; }
+      }
+    `;
+    
+    document.head.appendChild(fadeInOutStyle);
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+      fadeInOutStyle.remove();
+    }, 3000);
+  }
+
+  // Clear sensitive data from the editor
+  function clearSensitiveData() {
+    const editor = document.getElementById('editableContent');
+    if (!editor) return;
+
+    const text = editor.value;
+    const detectedPatterns = analyzeSensitiveData(text);
+    
+    if (detectedPatterns.length === 0) {
+      alert('No sensitive data found in the current text.');
+      return;
+    }
+
+    let cleanedText = text;
+    let removedCount = 0;
+
+    for (const pattern of detectedPatterns) {
+      for (const match of pattern.matches) {
+        cleanedText = cleanedText.replace(match, '[REMOVED]');
+        removedCount++;
+      }
+    }
+
+    editor.value = cleanedText;
+    
+    // Show notification
+    const notification = document.createElement('div');
+    notification.textContent = `Removed ${removedCount} sensitive data instances`;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #dc3545;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-weight: 500;
+      z-index: 10001;
+      animation: fadeInOut 3s ease-in-out;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 3000);
   }
 
   // Utility function to escape HTML
