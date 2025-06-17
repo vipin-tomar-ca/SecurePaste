@@ -1,0 +1,266 @@
+## GuardPasteAI: Detailed Feature Breakdown with User Stories & Tasks  
+
+### 🔐 Core Architecture Principles  
+1. **Hybrid Detection Engine**:  
+   - **LLM-Powered**: Cloud-based API for context-aware scanning  
+   - **Non-LLM Mode**: Dictionary-based + Regex + Pattern Analysis  
+2. **Privacy-First**: All processing local unless LLM explicitly enabled  
+3. **Tiered Intelligence**:  
+
+| Detection Level | Method | Free | Pro | Enterprise |  
+|-----------------|--------|------|-----|-----------|  
+| Basic Patterns | Regex | ✅ | ✅ | ✅ |  
+| Contextual Analysis | Local Dictionary | ✅ | ✅ | ✅ |  
+| Semantic Understanding | Cloud LLM | ❌ | ✅ | ✅ |  
+| Custom Entity Recognition | LLM Fine-tuning | ❌ | ❌ | ✅ |  
+
+---
+
+### 👥 User Stories & Tasks  
+
+#### 🆓 **Free Tier User Stories**  
+**1. As a security-conscious user, I want basic paste protection on AI sites**  
+```markdown
+- [ ] Task: Implement domain-specific paste event listener  
+- [ ] Task: Create core regex detection (emails/API keys/CC numbers)  
+- [ ] Task: Show native browser alert on detection  
+```  
+
+**2. As a privacy advocate, I want offline-only scanning**  
+```markdown
+- [ ] Task: Build local dictionary system (10k+ sensitive terms)  
+- [ ] Task: Implement pattern heuristics (e.g., "sk_live_*" = API key)  
+- [ ] Task: Add entropy analysis for password-like strings  
+```  
+
+**3. As a new user, I want one-click setup**  
+```markdown
+- [ ] Task: Create auto-configure for top AI sites (ChatGPT/Bard/Copilot)  
+- [ ] Task: Implement first-run tutorial overlay  
+```  
+
+#### 💎 **Premium Features (Pro Tier)**  
+**4. As a developer, I want custom detection rules**  
+```markdown
+- [ ] Task: Build regex editor with live testing  
+- [ ] Task: Add domain-specific rule sets  
+- [ ] Task: Create custom dictionary importer (CSV/TXT)  
+```  
+
+**5. As a power user, I want AI-powered scanning**  
+```markdown
+- [ ] Task: Integrate LLM API (e.g., Claude Haiku)  
+- [ ] Task: Implement semantic analysis:  
+  - Detect "internal project code names" via context  
+  - Identify sensitive narratives (e.g., patient stories)  
+- [ ] Task: Add confidence scoring (Low/Med/High risk)  
+```  
+
+**6. As a team lead, I need local history**  
+```markdown
+- [ ] Task: Create encrypted event log (IndexedDB)  
+- [ ] Task: Build history dashboard with risk trends  
+```  
+
+#### 🏢 **Enterprise User Stories**  
+**7. As a compliance officer, I need centralized control**  
+```markdown
+- [ ] Task: Develop admin web portal  
+- [ ] Task: Implement Chrome Policy deployment  
+- [ ] Task: Add SCIM user provisioning  
+```  
+
+**8. As a security team, I require advanced detection**  
+```markdown
+- [ ] Task: Build custom entity recognition:  
+  - Train LLM on company-specific sensitive terms  
+  - Detect proprietary code patterns  
+- [ ] Task: Add data fingerprinting:  
+  - Match against known confidential documents  
+```  
+
+**9. As an IT admin, I demand real-time alerts**  
+```markdown
+- [ ] Task: Create webhook integration (Slack/MS Teams)  
+- [ ] Task: Implement geofencing policies  
+- [ ] Task: Add automated compliance reports (GDPR/HIPAA)  
+```  
+
+---
+
+### 🧠 Intelligence System Design  
+
+#### 🔍 Non-LLM Detection Engine  
+```mermaid
+graph TD
+    A[Pasted Text] --> B(Keyword Dictionary)
+    A --> C(Regex Patterns)
+    A --> D(Pattern Analysis)
+    B -->|Match| E[Risk Score +80%]
+    C -->|Match| E[Risk Score +95%]
+    D -->|Entropy >7.2| E[Risk Score +65%]
+    D -->|Structure Match| E[Risk Score +50%]
+    E --> F{Total Score >85%?}
+    F -->|Yes| G[Block Paste]
+    F -->|No| H[Allow Paste]
+    
+    classDef premium fill:#4e8cff,stroke:#333;
+    classDef enterprise fill:#ff6b6b,stroke:#333;
+    class B,C,D,E,F,G,H default;
+```
+
+**Innovative Approaches:**  
+1. **Contextual Dictionary System**:  
+   ```javascript
+   // Industry-specific dictionaries
+   const financeTerms = ["SWIFT code", "routing number", "SIN"];
+   const healthTerms = ["PHI", "diagnosis code", "patient ID"];
+   
+   // Dynamic context detection
+   function getRelevantDictionaries(domain) {
+     if(domain.includes("bank")) return [...financeTerms, ...coreDictionary];
+     if(domain.includes("clinic")) return [...healthTerms, ...coreDictionary];
+     return coreDictionary;
+   }
+   ```
+
+2. **Structural Pattern Recognition**:  
+   ```python
+   def is_api_key(text):
+       patterns = [
+           r'[a-z0-9]{32}',  # MD5-like
+           r'sk_[a-z0-9]{40}', # Stripe-style
+           r'(?i)AKIA[0-9A-Z]{16}' # AWS
+       ]
+       return any(re.match(p, text) for p in patterns)
+   ```
+
+#### 🤖 LLM-Powered Detection (Pro/Enterprise)  
+```mermaid
+sequenceDiagram
+    participant User as Browser
+    participant Extension
+    participant LLM as Cloud AI
+    User->>Extension: Paste text
+    Extension->>LLM: Encrypted payload
+    Note right of LLM: Privacy-preserving scan
+    LLM->>Extension: Risk analysis + reasons
+    Extension->>User: Show intelligent warning
+```
+
+**Key Features:**  
+- **Context-Aware Scanning**:  
+  ```prompt
+  Analyze this text for sensitive information considering:
+  - Domain: chat.openai.com
+  - User industry: Healthcare
+  - Known risks: PHI, insurance IDs, patient narratives
+  
+  Text: "My patient John Doe (ID#12345) reported..."
+  ```  
+
+- **Redaction Suggestions**:  
+  ```json
+  {
+    "risk_score": 0.92,
+    "flagged_sections": [
+      {"text": "John Doe", "type": "PII"},
+      {"text": "ID#12345", "type": "Medical ID"}
+    ],
+    "suggested_redaction": "My patient [REDACTED] reported..."
+  }
+  ```
+
+---
+
+### 🛠️ Implementation Roadmap  
+
+#### 🚀 Phase 1: Core MVP (Week 1)  
+```gantt
+    title MVP Development Timeline
+    dateFormat  YYYY-MM-DD
+    section Core
+    Manifest & Setup       :2023-10-01, 1d
+    Paste Event Listener   :2023-10-02, 2d
+    Non-LLM Detection     :2023-10-03, 3d
+    Basic Warning UI      :2023-10-04, 2d
+    
+    section Premium Prep
+    Settings Scaffold     :2023-10-05, 2d
+    API Gateway           :2023-10-06, 2d
+```
+
+#### 💼 Phase 2: Premium (Week 2-3)  
+```gantt
+    title Premium Features
+    section Pro Features
+    LLM Integration       :2023-10-09, 4d
+    Custom Rules UI       :2023-10-10, 3d
+    Local History         :2023-10-12, 3d
+    
+    section Enterprise
+    Policy Engine         :2023-10-15, 5d
+    Webhook Alerts        :2023-10-16, 2d
+```
+
+#### 🌐 Phase 3: Enterprise (Month 2)  
+```gantt
+    title Enterprise System
+    section Admin Portal
+    Dashboard Framework   :2023-11-01, 5d
+    SCIM Integration      :2023-11-05, 4d
+    Custom Entity Training:2023-11-08, 6d
+    
+    section Compliance
+    Audit Logs           :2023-11-10, 4d
+    Regulatory Reports   :2023-11-12, 5d
+```
+
+---
+
+### 🔒 Security Architecture  
+**Data Handling Matrix:**  
+
+| Component | Free Tier | Pro Tier | Enterprise |  
+|-----------|-----------|----------|-----------|  
+| Text Processing | Device-only | Device + Encrypted API | Customer-choice |  
+| Detection Models | Static Rules | Cloud LLM | Dedicated Instance |  
+| Alert Data | No storage | 7-day local | Encrypted cloud |  
+| Compliance Certs | - | SOC 2 | HIPAA/GDPR |  
+
+**Innovative Privacy Techniques:**  
+1. **Federated Learning**: Enterprise customers train custom models without sharing raw data  
+2. **Homomorphic Encryption**: Process encrypted text via LLM without decryption  
+3. **Sharded Dictionaries**: Split sensitive term databases across local/cloud  
+
+---
+
+### 💰 Monetization Implementation  
+**Upgrade Flow:**  
+```mermaid
+flowchart TB
+    Free[Free User] -->|Settings Upgrade| Paywall
+    Paywall --> Pro["Pro: $5/mo"]
+    Paywall --> EnterpriseDemo["Enterprise: Request Demo"]
+    Pro -->|Team >5| EnterpriseContact["Contact Sales"]
+```
+
+**Feature Gates:**  
+```javascript
+// Feature flag system
+const features = {
+  llmScanning: user.tier !== 'free',
+  customEntities: user.tier === 'enterprise',
+  centralPolicy: user.tier === 'enterprise'
+};
+
+if(features.llmScanning) {
+  enableAIScanning();
+}
+```
+
+Let me know if you'd like:  
+1. Detailed technical specs for any component  
+2. Sample code for hybrid detection engine  
+3. Mockups for premium features UI  
+4. Enterprise deployment playbook

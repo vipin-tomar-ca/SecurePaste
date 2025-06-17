@@ -2,22 +2,97 @@
 (function() {
   'use strict';
 
-  let isExtensionEnabled = true;
+  let currentSettings = {};
   let warningDialog = null;
   let pendingPasteEvent = null;
+  let detectionEngine = null;
+  let llmIntegration = null;
 
-  // Initialize extension
+  // Initialize extension with advanced detection engine
   async function init() {
     try {
-      const result = await chrome.storage.sync.get(['extensionEnabled', 'whitelistedSites']);
-      isExtensionEnabled = result.extensionEnabled !== false;
+      // Load detection engine and LLM integration
+      await loadExternalModules();
       
-      if (isExtensionEnabled) {
-        setupPasteMonitoring();
-        console.log('Sensitive Data Paste Guard: Monitoring enabled');
+      // Initialize detection systems
+      detectionEngine = new DetectionEngine();
+      llmIntegration = new LLMIntegration();
+      
+      // Get current settings
+      const settings = await new Promise((resolve) => {
+        chrome.runtime.sendMessage({ action: 'getSettings' }, resolve);
+      });
+      
+      currentSettings = settings || {};
+      
+      if (!currentSettings.extensionEnabled) {
+        return;
       }
+      
+      // Check enterprise geofencing if enabled
+      if (currentSettings.enterprise?.enabled && currentSettings.enterprise.geofencing?.enabled) {
+        const locationAllowed = await checkGeofencing();
+        if (!locationAllowed) {
+          console.log('GuardPasteAI: Access blocked due to geofencing policy');
+          return;
+        }
+      }
+      
+      setupPasteMonitoring();
+      console.log('GuardPasteAI: Advanced monitoring enabled');
     } catch (error) {
-      console.error('Sensitive Data Paste Guard: Initialization failed', error);
+      console.error('GuardPasteAI: Initialization failed', error);
+    }
+  }
+
+  // Load external detection modules
+  async function loadExternalModules() {
+    const scripts = ['detection-engine.js', 'llm-integration.js'];
+    
+    for (const script of scripts) {
+      if (!window[script.replace('.js', '').replace('-', '')]) {
+        await loadScript(script);
+      }
+    }
+  }
+
+  // Load script dynamically
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = chrome.runtime.getURL(src);
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  // Check geofencing policy for enterprise users
+  async function checkGeofencing() {
+    if (!navigator.geolocation) return true;
+    
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 5000,
+          enableHighAccuracy: false
+        });
+      });
+      
+      const location = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      
+      const response = await chrome.runtime.sendMessage({
+        action: 'checkGeofencing',
+        location
+      });
+      
+      return response?.allowed !== false;
+    } catch (error) {
+      console.error('Geofencing check failed:', error);
+      return true; // Allow by default if geolocation fails
     }
   }
 
@@ -29,9 +104,9 @@
     document.addEventListener('input', handleInputEvent, true);
   }
 
-  // Handle paste events
+  // Handle paste events with advanced detection
   async function handlePasteEvent(event) {
-    if (!isExtensionEnabled) return;
+    if (!currentSettings.extensionEnabled) return;
 
     try {
       // Get clipboard data
@@ -41,10 +116,32 @@
       const pastedText = clipboardData.getData('text/plain');
       if (!pastedText || pastedText.length < 10) return; // Skip short text
 
-      // Analyze for sensitive patterns
-      const detectedPatterns = analyzeSensitiveData(pastedText);
+      // Prepare detection options
+      const detectionOptions = {
+        domain: window.location.hostname,
+        userTier: currentSettings.userTier || 'free',
+        enableLLM: currentSettings.enableLLM && (currentSettings.userTier === 'pro' || currentSettings.userTier === 'enterprise'),
+        llmProvider: currentSettings.llmProvider || 'anthropic',
+        userRole: currentSettings.enterprise?.userRole,
+        industry: currentSettings.enterprise?.industry,
+        customInstructions: currentSettings.enterprise?.customInstructions
+      };
+
+      // Use advanced detection engine
+      let analysisResult;
+      if (detectionEngine) {
+        analysisResult = await detectionEngine.analyze(pastedText, detectionOptions);
+      } else {
+        // Fallback to basic detection
+        const detectedPatterns = analyzeSensitiveData(pastedText);
+        analysisResult = {
+          riskScore: detectedPatterns.length > 0 ? 0.8 : 0,
+          detectedPatterns: detectedPatterns,
+          confidence: 'medium'
+        };
+      }
       
-      if (detectedPatterns.length > 0) {
+      if (analysisResult.riskScore > 0.3 || analysisResult.detectedPatterns.length > 0) {
         // Prevent the paste operation
         event.preventDefault();
         event.stopPropagation();
