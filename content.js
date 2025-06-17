@@ -8,15 +8,21 @@
   let detectionEngine = null;
   let llmIntegration = null;
 
-  // Initialize extension with advanced detection engine
+  // Initialize extension with hybrid detection engine
   async function init() {
     try {
-      // Load detection engine and LLM integration
-      await loadExternalModules();
-      
-      // Initialize detection systems
-      detectionEngine = new DetectionEngine();
-      llmIntegration = new LLMIntegration();
+      // Initialize advanced detection systems
+      if (typeof DetectionEngine !== 'undefined') {
+        detectionEngine = new DetectionEngine();
+      }
+      if (typeof LLMIntegration !== 'undefined') {
+        llmIntegration = new LLMIntegration();
+      }
+      if (typeof DictionaryManager !== 'undefined') {
+        window.dictionaryManager = new DictionaryManager();
+        // Load compressed dictionaries for fast lookup
+        await window.dictionaryManager.loadDictionaries(detectionEngine?.dictionaries || {});
+      }
       
       // Get current settings
       const settings = await new Promise((resolve) => {
@@ -29,7 +35,7 @@
         return;
       }
       
-      // Check enterprise geofencing if enabled
+      // Enterprise geofencing check
       if (currentSettings.enterprise?.enabled && currentSettings.enterprise.geofencing?.enabled) {
         const locationAllowed = await checkGeofencing();
         if (!locationAllowed) {
@@ -38,10 +44,37 @@
         }
       }
       
+      // Load emergency patterns if any
+      await loadEmergencyPatterns();
+      
       setupPasteMonitoring();
-      console.log('GuardPasteAI: Advanced monitoring enabled');
+      console.log('GuardPasteAI: Hybrid detection engine initialized');
     } catch (error) {
       console.error('GuardPasteAI: Initialization failed', error);
+    }
+  }
+
+  // Load emergency threat patterns
+  async function loadEmergencyPatterns() {
+    try {
+      const stored = await chrome.storage.local.get(['emergencyPatterns', 'lastEmergencyUpdate']);
+      
+      if (stored.emergencyPatterns && detectionEngine) {
+        const patterns = stored.emergencyPatterns;
+        const lastUpdate = stored.lastEmergencyUpdate || 0;
+        
+        // Check if patterns are still valid (within 24 hours)
+        if (Date.now() - lastUpdate < 24 * 60 * 60 * 1000) {
+          await detectionEngine.handleEmergencyPatternUpdate(patterns);
+          console.log(`Loaded ${patterns.length} emergency threat patterns`);
+        } else {
+          // Clean up expired patterns
+          detectionEngine.cleanupExpiredPatterns();
+          await chrome.storage.local.remove(['emergencyPatterns', 'lastEmergencyUpdate']);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load emergency patterns:', error);
     }
   }
 
