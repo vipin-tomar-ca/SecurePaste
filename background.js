@@ -7,7 +7,21 @@ chrome.runtime.onInstalled.addListener(async () => {
     blacklistedSites: [],
     detectionSensitivity: 'medium',
     showDiscreetWarnings: true,
-    logPreventions: true
+    logPreventions: true,
+    autoReplace: {
+      enabled: false,
+      creditCard: '4111-1111-1111-1111',
+      ssn: '123-45-6789',
+      email: 'user@example.com',
+      phone: '(555) 123-4567',
+      bankAccount: '12345678',
+      driversLicense: 'DL123456',
+      ipAddress: '192.168.1.1',
+      apiKey: 'sk-1234567890abcdef',
+      bitcoin: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      password: '********',
+      devSecret: 'dev_secret_placeholder'
+    }
   };
 
   try {
@@ -96,7 +110,8 @@ async function handleGetSettings(sendResponse) {
       'blacklistedSites',
       'detectionSensitivity',
       'showDiscreetWarnings',
-      'logPreventions'
+      'logPreventions',
+      'autoReplace'
     ]);
     
     const logs = await chrome.storage.local.get(['preventionLogs']);

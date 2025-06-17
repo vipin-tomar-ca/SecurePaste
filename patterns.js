@@ -56,6 +56,20 @@ const SensitivePatterns = {
     description: 'Potential API key or token detected'
   },
 
+  // Passwords (basic patterns)
+  password: {
+    pattern: /\b(?:password|pwd|pass)[_-]?[:=]\s*['""]?[^\s'"]{8,}['""]?/gi,
+    name: 'Password',
+    description: 'Potential password detected'
+  },
+
+  // Development secrets and configuration
+  devSecret: {
+    pattern: /\b(?:secret|key|token|password)[_-]?[:=]\s*['""]?(?:sk_|pk_|Bearer\s+)?[A-Za-z0-9_-]{16,}['""]?/gi,
+    name: 'Development Secret',
+    description: 'Potential development secret or configuration'
+  },
+
   // Bitcoin addresses
   bitcoin: {
     pattern: /\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b|bc1[a-z0-9]{39,59}\b/g,

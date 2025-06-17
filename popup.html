@@ -76,6 +76,52 @@
           Log prevention events
         </label>
       </div>
+
+      <div class="setting-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="autoReplaceEnabled">
+          <span class="checkmark"></span>
+          Enable auto-replacement with dummy data
+        </label>
+      </div>
+    </div>
+
+    <!-- Auto-Replace Settings Section -->
+    <div class="replacement-section" id="replacementSection">
+      <h3>Replacement Values</h3>
+      <p class="section-description">Configure dummy values to replace sensitive data</p>
+      
+      <div class="replacement-grid">
+        <div class="replacement-item">
+          <label for="creditCardReplace">Credit Card</label>
+          <input type="text" id="creditCardReplace" placeholder="4111-1111-1111-1111">
+        </div>
+        
+        <div class="replacement-item">
+          <label for="ssnReplace">SSN</label>
+          <input type="text" id="ssnReplace" placeholder="123-45-6789">
+        </div>
+        
+        <div class="replacement-item">
+          <label for="emailReplace">Email</label>
+          <input type="text" id="emailReplace" placeholder="user@example.com">
+        </div>
+        
+        <div class="replacement-item">
+          <label for="phoneReplace">Phone</label>
+          <input type="text" id="phoneReplace" placeholder="(555) 123-4567">
+        </div>
+        
+        <div class="replacement-item">
+          <label for="apiKeyReplace">API Key</label>
+          <input type="text" id="apiKeyReplace" placeholder="sk-1234567890abcdef">
+        </div>
+        
+        <div class="replacement-item">
+          <label for="passwordReplace">Password</label>
+          <input type="text" id="passwordReplace" placeholder="********">
+        </div>
+      </div>
     </div>
 
     <!-- Whitelist Section -->

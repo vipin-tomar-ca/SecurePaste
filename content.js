@@ -113,7 +113,8 @@
               <textarea id="editableContent" class="content-editor" placeholder="Your content will appear here...">${escapeHtml(text)}</textarea>
               <div class="editor-actions">
                 <button class="btn-highlight" onclick="highlightSensitiveData()">Highlight Sensitive Data</button>
-                <button class="btn-clear" onclick="clearSensitiveData()">Remove Sensitive Data</button>
+                <button class="btn-clear" onclick="clearSensitiveData()">Replace with Dummy Data</button>
+                <button class="btn-auto-replace" onclick="autoReplaceInEditor()">Auto-Replace All</button>
               </div>
             </div>
             <div class="preview-section">
@@ -272,7 +273,7 @@
         margin-top: 10px;
       }
       
-      .btn-highlight, .btn-clear {
+      .btn-highlight, .btn-clear, .btn-auto-replace {
         padding: 6px 12px;
         border: none;
         border-radius: 4px;
@@ -298,6 +299,15 @@
       
       .btn-clear:hover {
         background: #c82333;
+      }
+      
+      .btn-auto-replace {
+        background: #17a2b8;
+        color: white;
+      }
+      
+      .btn-auto-replace:hover {
+        background: #138496;
       }
       
       .warning-actions {
@@ -354,6 +364,7 @@
     window.proceedWithEditedPaste = proceedWithEditedPaste;
     window.highlightSensitiveData = highlightSensitiveData;
     window.clearSensitiveData = clearSensitiveData;
+    window.autoReplaceInEditor = autoReplaceInEditor;
   }
 
   // Show discreet warning for typed content
@@ -566,41 +577,143 @@
       return;
     }
 
-    let cleanedText = text;
-    let removedCount = 0;
+    // Get replacement settings
+    chrome.runtime.sendMessage({ action: 'getSettings' }, (response) => {
+      if (response.success) {
+        const settings = response.settings;
+        const autoReplace = settings.autoReplace || {};
+        
+        let cleanedText = text;
+        let replacedCount = 0;
 
-    for (const pattern of detectedPatterns) {
-      for (const match of pattern.matches) {
-        cleanedText = cleanedText.replace(match, '[REMOVED]');
-        removedCount++;
+        for (const pattern of detectedPatterns) {
+          const replacementValue = autoReplace[pattern.type] || '[REMOVED]';
+          
+          for (const match of pattern.matches) {
+            cleanedText = cleanedText.replace(match, replacementValue);
+            replacedCount++;
+          }
+        }
+
+        editor.value = cleanedText;
+        
+        // Show notification
+        const notification = document.createElement('div');
+        notification.textContent = `Replaced ${replacedCount} sensitive data instances with dummy values`;
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #28a745;
+          color: white;
+          padding: 10px 15px;
+          border-radius: 6px;
+          font-weight: 500;
+          z-index: 10001;
+          animation: fadeInOut 3s ease-in-out;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove();
+          }
+        }, 3000);
       }
+    });
+  }
+
+  // Auto-replace in editor with settings-based replacement
+  function autoReplaceInEditor() {
+    const editor = document.getElementById('editableContent');
+    if (!editor) return;
+
+    const text = editor.value;
+    const detectedPatterns = analyzeSensitiveData(text);
+    
+    if (detectedPatterns.length === 0) {
+      alert('No sensitive data found in the current text.');
+      return;
     }
 
-    editor.value = cleanedText;
-    
-    // Show notification
-    const notification = document.createElement('div');
-    notification.textContent = `Removed ${removedCount} sensitive data instances`;
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #dc3545;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 6px;
-      font-weight: 500;
-      z-index: 10001;
-      animation: fadeInOut 3s ease-in-out;
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.remove();
+    chrome.runtime.sendMessage({ action: 'getSettings' }, (response) => {
+      if (response.success) {
+        const settings = response.settings;
+        const autoReplace = settings.autoReplace || {};
+        
+        let replacedText = text;
+        let replacedCount = 0;
+
+        for (const pattern of detectedPatterns) {
+          const replacementValue = autoReplace[pattern.type] || '[PLACEHOLDER]';
+          
+          for (const match of pattern.matches) {
+            replacedText = replacedText.replace(match, replacementValue);
+            replacedCount++;
+          }
+        }
+
+        editor.value = replacedText;
+        
+        // Show notification
+        const notification = document.createElement('div');
+        notification.textContent = `Auto-replaced ${replacedCount} items with configured dummy values`;
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #17a2b8;
+          color: white;
+          padding: 10px 15px;
+          border-radius: 6px;
+          font-weight: 500;
+          z-index: 10001;
+          animation: fadeInOut 3s ease-in-out;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove();
+          }
+        }, 3000);
       }
-    }, 3000);
+    });
+  }
+
+  // Auto-replace sensitive data with dummy values
+  async function autoReplaceSensitiveData(text) {
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage({ action: 'getSettings' }, (response) => {
+        if (response.success) {
+          const settings = response.settings;
+          const autoReplace = settings.autoReplace || {};
+          
+          if (!autoReplace.enabled) {
+            resolve(text);
+            return;
+          }
+
+          const detectedPatterns = analyzeSensitiveData(text);
+          let replacedText = text;
+
+          for (const pattern of detectedPatterns) {
+            const replacementValue = autoReplace[pattern.type];
+            if (replacementValue) {
+              for (const match of pattern.matches) {
+                replacedText = replacedText.replace(match, replacementValue);
+              }
+            }
+          }
+
+          resolve(replacedText);
+        } else {
+          resolve(text);
+        }
+      });
+    });
   }
 
   // Utility function to escape HTML
