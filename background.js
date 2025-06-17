@@ -242,9 +242,15 @@ async function handleGetSettings(sendResponse) {
     
     const logs = await chrome.storage.local.get(['preventionLogs']);
     
+    // Set default user tier if not specified
+    const userTier = settings.userTier || 'free';
+    
     sendResponse({
       success: true,
-      settings: settings,
+      settings: {
+        ...settings,
+        userTier
+      },
       logs: logs.preventionLogs || []
     });
   } catch (error) {

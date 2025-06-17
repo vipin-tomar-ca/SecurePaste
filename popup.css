@@ -326,6 +326,69 @@ input:checked + .slider:before {
   font-size: 12px;
 }
 
+.tier-badge {
+  display: inline-block;
+  background: linear-gradient(45deg, #28a745, #20c997);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.tier-badge.pro {
+  background: linear-gradient(45deg, #007bff, #6f42c1);
+}
+
+.tier-badge.enterprise {
+  background: linear-gradient(45deg, #6f42c1, #e83e8c);
+}
+
+.upgrade-section {
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin: 0 0 15px 0;
+}
+
+.upgrade-card h3 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+}
+
+.upgrade-card p {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.upgrade-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-upgrade {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-enterprise {
+  background: transparent;
+  color: white;
+  border: 1px solid white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
 .generator-actions {
   display: flex;
   gap: 8px;

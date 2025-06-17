@@ -43,9 +43,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const privacyMode = document.getElementById('privacyMode');
   const customPatterns = document.getElementById('customPatterns');
   const industryContext = document.getElementById('industryContext');
+  
+  // Tier management elements
+  const tierBadge = document.getElementById('tierBadge');
+  const upgradeSection = document.getElementById('upgradeSection');
+  const upgradeProBtn = document.getElementById('upgradeProBtn');
+  const enterpriseBtn = document.getElementById('enterpriseBtn');
 
   let currentSettings = {};
   let currentLogs = [];
+  let featureGates = null;
 
   // Load initial data
   await loadSettings();
@@ -88,10 +95,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   customPatterns.addEventListener('input', handleCustomRulesChange);
   industryContext.addEventListener('change', handleCustomRulesChange);
   
+  // Tier management event listeners
+  upgradeProBtn.addEventListener('click', handleUpgradePro);
+  enterpriseBtn.addEventListener('click', handleEnterpriseContact);
+  
   // Add event listeners for individual generate buttons
   document.querySelectorAll('.generate-single-btn').forEach(btn => {
     btn.addEventListener('click', handleGenerateSingle);
   });
+
+  // Initialize feature gates
+  if (typeof FeatureGates !== 'undefined') {
+    featureGates = new FeatureGates();
+  }
 
   // Load settings from storage
   async function loadSettings() {
@@ -178,6 +194,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Load API key for current provider
     loadApiKey();
+    
+    // Update tier display and upgrade prompts
+    updateTierDisplay(currentSettings.userTier || 'free');
     
     // Whitelist
     updateWhitelistDisplay();
@@ -811,6 +830,62 @@ document.addEventListener('DOMContentLoaded', async () => {
       apiKeyInput.value = '';
       apiKeyInput.dataset.hasKey = 'false';
     }
+  }
+
+  // Update tier display
+  function updateTierDisplay(userTier) {
+    tierBadge.textContent = userTier.toUpperCase();
+    tierBadge.className = `tier-badge ${userTier}`;
+    
+    // Show upgrade section for free users
+    if (userTier === 'free') {
+      upgradeSection.style.display = 'block';
+    } else {
+      upgradeSection.style.display = 'none';
+    }
+    
+    // Apply feature gates to UI
+    applyFeatureGates(userTier);
+  }
+
+  // Apply feature gates to UI elements
+  function applyFeatureGates(userTier) {
+    if (!featureGates) return;
+    
+    // LLM features
+    const hasLLM = featureGates.hasFeature(userTier, 'llmDetection');
+    enableLLM.disabled = !hasLLM;
+    if (!hasLLM) {
+      enableLLM.checked = false;
+      llmConfig.classList.remove('show');
+    }
+    
+    // Custom rules
+    const hasCustomRules = featureGates.hasFeature(userTier, 'customRules');
+    customPatterns.disabled = !hasCustomRules;
+    industryContext.disabled = !hasCustomRules;
+    
+    // Enterprise features
+    const hasEnterprise = featureGates.hasFeature(userTier, 'enterpriseFeatures');
+    enterpriseEnabled.disabled = !hasEnterprise;
+    if (!hasEnterprise) {
+      enterpriseEnabled.checked = false;
+      enterpriseConfig.classList.remove('show');
+    }
+  }
+
+  // Handle Pro upgrade
+  function handleUpgradePro() {
+    chrome.tabs.create({
+      url: 'https://guardpasteai.com/upgrade/pro'
+    });
+  }
+
+  // Handle Enterprise contact
+  function handleEnterpriseContact() {
+    chrome.tabs.create({
+      url: 'https://guardpasteai.com/enterprise/contact'
+    });
   }
 
   // Utility functions
