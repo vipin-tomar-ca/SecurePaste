@@ -129,7 +129,24 @@
         <p><strong>SSN:</strong> <code>123-45-6789</code></p>
         <p><strong>Email:</strong> <code>john.doe@email.com</code></p>
         <p><strong>Phone:</strong> <code>(555) 123-4567</code></p>
-        <p><strong>Mixed Example:</strong> <code>My card is 4532123456789012 and SSN is 987-65-4321. Contact me at jane@example.com or (555) 987-6543.</code></p>
+        <p><strong>API Key:</strong> <code>sk-1234567890abcdef1234567890abcdef</code></p>
+        <p><strong>Password:</strong> <code>password=MySecretPass123!</code></p>
+        <p><strong>Dev Secret:</strong> <code>api_key=dev_abc123xyz789secret</code></p>
+        <p><strong>Mixed Example:</strong> <code>My card is 4532123456789012 and SSN is 987-65-4321. Contact me at jane@example.com or (555) 987-6543. API key: sk-live_1234567890abcdef</code></p>
+    </div>
+
+    <div class="generator-demo">
+        <h4>🎲 Test Generator Functionality</h4>
+        <p>Click buttons below to generate realistic dummy data that can replace sensitive information:</p>
+        <div class="generator-buttons">
+            <button onclick="generateAndShow('creditCard')">Generate Credit Card</button>
+            <button onclick="generateAndShow('ssn')">Generate SSN</button>
+            <button onclick="generateAndShow('email')">Generate Email</button>
+            <button onclick="generateAndShow('phone')">Generate Phone</button>
+            <button onclick="generateAndShow('apiKey')">Generate API Key</button>
+            <button onclick="generateAndShow('password')">Generate Password</button>
+        </div>
+        <div id="generatedOutput" class="generated-output"></div>
     </div>
 
     <div class="feature-demo">

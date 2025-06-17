@@ -91,35 +91,58 @@
       <h3>Replacement Values</h3>
       <p class="section-description">Configure dummy values to replace sensitive data</p>
       
+      <div class="generator-actions">
+        <button id="generateAllBtn" class="generator-btn">Generate All Dummy Values</button>
+        <button id="resetDefaultsBtn" class="generator-btn secondary">Reset to Defaults</button>
+      </div>
+      
       <div class="replacement-grid">
         <div class="replacement-item">
           <label for="creditCardReplace">Credit Card</label>
-          <input type="text" id="creditCardReplace" placeholder="4111-1111-1111-1111">
+          <div class="input-with-generator">
+            <input type="text" id="creditCardReplace" placeholder="4111-1111-1111-1111">
+            <button class="generate-single-btn" data-type="creditCard">🎲</button>
+          </div>
         </div>
         
         <div class="replacement-item">
           <label for="ssnReplace">SSN</label>
-          <input type="text" id="ssnReplace" placeholder="123-45-6789">
+          <div class="input-with-generator">
+            <input type="text" id="ssnReplace" placeholder="123-45-6789">
+            <button class="generate-single-btn" data-type="ssn">🎲</button>
+          </div>
         </div>
         
         <div class="replacement-item">
           <label for="emailReplace">Email</label>
-          <input type="text" id="emailReplace" placeholder="user@example.com">
+          <div class="input-with-generator">
+            <input type="text" id="emailReplace" placeholder="user@example.com">
+            <button class="generate-single-btn" data-type="email">🎲</button>
+          </div>
         </div>
         
         <div class="replacement-item">
           <label for="phoneReplace">Phone</label>
-          <input type="text" id="phoneReplace" placeholder="(555) 123-4567">
+          <div class="input-with-generator">
+            <input type="text" id="phoneReplace" placeholder="(555) 123-4567">
+            <button class="generate-single-btn" data-type="phone">🎲</button>
+          </div>
         </div>
         
         <div class="replacement-item">
           <label for="apiKeyReplace">API Key</label>
-          <input type="text" id="apiKeyReplace" placeholder="sk-1234567890abcdef">
+          <div class="input-with-generator">
+            <input type="text" id="apiKeyReplace" placeholder="sk-1234567890abcdef">
+            <button class="generate-single-btn" data-type="apiKey">🎲</button>
+          </div>
         </div>
         
         <div class="replacement-item">
           <label for="passwordReplace">Password</label>
-          <input type="text" id="passwordReplace" placeholder="********">
+          <div class="input-with-generator">
+            <input type="text" id="passwordReplace" placeholder="********">
+            <button class="generate-single-btn" data-type="password">🎲</button>
+          </div>
         </div>
       </div>
     </div>
@@ -151,6 +174,7 @@
     </div>
   </div>
 
+  <script src="data-generator.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

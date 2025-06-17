@@ -34,7 +34,7 @@
         "https://cohere.ai/*",
         "https://anthropic.com/*"
       ],
-      "js": ["patterns.js", "content.js"],
+      "js": ["patterns.js", "data-generator.js", "content.js"],
       "run_at": "document_start"
     }
   ],

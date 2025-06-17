@@ -646,7 +646,14 @@
         let replacedCount = 0;
 
         for (const pattern of detectedPatterns) {
-          const replacementValue = autoReplace[pattern.type] || '[PLACEHOLDER]';
+          let replacementValue = autoReplace[pattern.type];
+          
+          // If no custom value is set, generate a dummy value
+          if (!replacementValue && typeof DataGenerator !== 'undefined') {
+            replacementValue = DataGenerator.generateByType(pattern.type);
+          } else if (!replacementValue) {
+            replacementValue = '[PLACEHOLDER]';
+          }
           
           for (const match of pattern.matches) {
             replacedText = replacedText.replace(match, replacementValue);

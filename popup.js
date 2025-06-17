@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const logsContainer = document.getElementById('logsContainer');
   const clearLogsBtn = document.getElementById('clearLogsBtn');
   const exportSettingsBtn = document.getElementById('exportSettingsBtn');
+  const generateAllBtn = document.getElementById('generateAllBtn');
+  const resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
 
   let currentSettings = {};
   let currentLogs = [];
@@ -51,6 +53,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   clearLogsBtn.addEventListener('click', handleClearLogs);
   exportSettingsBtn.addEventListener('click', handleExportSettings);
+  generateAllBtn.addEventListener('click', handleGenerateAll);
+  resetDefaultsBtn.addEventListener('click', handleResetDefaults);
+  
+  // Add event listeners for individual generate buttons
+  document.querySelectorAll('.generate-single-btn').forEach(btn => {
+    btn.addEventListener('click', handleGenerateSingle);
+  });
 
   // Load settings from storage
   async function loadSettings() {
@@ -372,6 +381,127 @@ document.addEventListener('DOMContentLoaded', async () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  // Handle generate all dummy values
+  async function handleGenerateAll() {
+    if (typeof DataGenerator === 'undefined') {
+      console.error('DataGenerator not available');
+      return;
+    }
+
+    const generatedData = DataGenerator.generateAll();
+    
+    // Update all input fields
+    creditCardReplace.value = generatedData.creditCard;
+    ssnReplace.value = generatedData.ssn;
+    emailReplace.value = generatedData.email;
+    phoneReplace.value = generatedData.phone;
+    apiKeyReplace.value = generatedData.apiKey;
+    passwordReplace.value = generatedData.password;
+
+    // Save to settings
+    await handleReplacementChange();
+    
+    // Show notification
+    showNotification('Generated all dummy values successfully', 'success');
+  }
+
+  // Handle reset to defaults
+  async function handleResetDefaults() {
+    const defaultValues = {
+      creditCard: '4111-1111-1111-1111',
+      ssn: '123-45-6789',
+      email: 'user@example.com',
+      phone: '(555) 123-4567',
+      apiKey: 'sk-1234567890abcdef',
+      password: '********'
+    };
+
+    // Update all input fields
+    creditCardReplace.value = defaultValues.creditCard;
+    ssnReplace.value = defaultValues.ssn;
+    emailReplace.value = defaultValues.email;
+    phoneReplace.value = defaultValues.phone;
+    apiKeyReplace.value = defaultValues.apiKey;
+    passwordReplace.value = defaultValues.password;
+
+    // Save to settings
+    await handleReplacementChange();
+    
+    // Show notification
+    showNotification('Reset to default values', 'info');
+  }
+
+  // Handle generate single value
+  async function handleGenerateSingle(event) {
+    if (typeof DataGenerator === 'undefined') {
+      console.error('DataGenerator not available');
+      return;
+    }
+
+    const type = event.target.getAttribute('data-type');
+    const generatedValue = DataGenerator.generateByType(type);
+    
+    // Update the corresponding input field
+    const inputMap = {
+      creditCard: creditCardReplace,
+      ssn: ssnReplace,
+      email: emailReplace,
+      phone: phoneReplace,
+      apiKey: apiKeyReplace,
+      password: passwordReplace
+    };
+
+    const input = inputMap[type];
+    if (input) {
+      input.value = generatedValue;
+      await handleReplacementChange();
+      showNotification(`Generated new ${type.replace(/([A-Z])/g, ' $1').toLowerCase()}`, 'success');
+    }
+  }
+
+  // Show notification helper
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      z-index: 10000;
+      max-width: 200px;
+      animation: slideIn 0.3s ease-out;
+    `;
+
+    // Set colors based on type
+    switch (type) {
+      case 'success':
+        notification.style.background = '#28a745';
+        notification.style.color = 'white';
+        break;
+      case 'error':
+        notification.style.background = '#dc3545';
+        notification.style.color = 'white';
+        break;
+      case 'info':
+      default:
+        notification.style.background = '#007bff';
+        notification.style.color = 'white';
+        break;
+    }
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 2000);
   }
 
   // Utility functions
