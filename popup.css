@@ -258,6 +258,74 @@ input:checked + .slider:before {
   box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
 }
 
+.pro-section {
+  padding: 0 20px 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+.pro-badge {
+  background: linear-gradient(45deg, #007bff, #6f42c1);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.llm-config {
+  display: none;
+  margin-top: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.llm-config.show {
+  display: block;
+}
+
+.llm-config select,
+.llm-config input[type="password"] {
+  width: 70%;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.custom-rules-section {
+  margin-top: 15px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.custom-rules-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #495057;
+}
+
+.custom-rules-section textarea {
+  width: 100%;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: monospace;
+  resize: vertical;
+}
+
+.custom-rules-section select {
+  width: 100%;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
 .generator-actions {
   display: flex;
   gap: 8px;

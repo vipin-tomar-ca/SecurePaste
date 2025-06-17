@@ -1,0 +1,343 @@
+## 1. Detailed Technical Specs for Hybrid Detection Engine
+
+### Architecture Overview
+```mermaid
+graph LR
+    A[Paste Event] --> B{Detection Mode}
+    B -->|Non-LLM| C[Regex Engine]
+    B -->|Non-LLM| D[Dictionary System]
+    B -->|Non-LLM| E[Pattern Analysis]
+    B -->|LLM| F[Cloud API]
+    C --> G[Risk Scoring]
+    D --> G
+    E --> G
+    F --> G
+    G --> H{Decision Engine}
+    H -->|Block| I[Warning UI]
+    H -->|Allow| J[Paste Execution]
+```
+
+### Core Components
+- **Regex Engine**: 150+ prebuilt patterns covering PII, credentials, financial data
+- **Dictionary System**:
+  - Base: 10,000+ sensitive terms (industry-agnostic)
+  - Vertical-specific dictionaries (Healthcare, Finance, Legal)
+  - Custom dictionary import (CSV/JSON)
+- **Pattern Analysis**:
+  - Entropy calculation for password-like strings
+  - Structural pattern recognition (e.g., AWS key formats)
+  - Contextual proximity analysis
+- **LLM Gateway**:
+  - AES-256 encrypted payloads
+  - Context-enriched prompts
+  - Response normalization layer
+
+### Privacy Preservation Techniques
+```python
+# Homomorphic Encryption Example (pseudocode)
+def process_text(text):
+    if config.llm_enabled and user.tier != "free":
+        encrypted = homomorphic_encrypt(text, public_key)
+        response = llm_gateway.scan(encrypted)
+        return homomorphic_decrypt(response, private_key)
+    else:
+        return local_engine.scan(text)
+```
+
+## 2. Sample Code for Hybrid Detection Engine
+
+### Core Detection Class
+```javascript
+class GuardPasteDetector {
+  constructor(config) {
+    this.regexPatterns = this.loadPatterns(config.rules);
+    this.dictionaries = this.loadDictionaries(config.industry);
+    this.llmEnabled = config.llm_enabled;
+  }
+
+  async detect(text, domain) {
+    // Phase 1: Local detection
+    const localResult = this.localScan(text, domain);
+    
+    // Short-circuit if high confidence match
+    if (localResult.score >= 0.9) return localResult;
+    
+    // Phase 2: LLM verification (Pro/Enterprise only)
+    if (this.llmEnabled && localResult.score >= 0.4) {
+      const llmResult = await this.llmScan(text, domain);
+      return this.combineResults(localResult, llmResult);
+    }
+    
+    return localResult;
+  }
+
+  localScan(text, domain) {
+    const matches = [];
+    let score = 0;
+    
+    // Regex detection
+    this.regexPatterns.forEach(rule => {
+      if (new RegExp(rule.pattern, 'i').test(text)) {
+        matches.push({ type: 'regex', label: rule.label });
+        score += rule.weight;
+      }
+    });
+    
+    // Dictionary matching with contextual boosting
+    const relevantDict = this.getContextualDictionary(domain);
+    relevantDict.forEach(term => {
+      if (text.toLowerCase().includes(term)) {
+        matches.push({ type: 'dictionary', label: term });
+        score += 0.15; // Base weight
+        
+        // Boost if near high-risk indicators
+        if (/(password|key|secret)/i.test(text)) score += 0.25;
+      }
+    });
+    
+    // Pattern analysis
+    if (this.isApiKey(text)) {
+      matches.push({ type: 'pattern', label: 'API Key' });
+      score += 0.7;
+    }
+    
+    return { matches, score: Math.min(score, 1.0) };
+  }
+  
+  // Advanced pattern recognition
+  isApiKey(text) {
+    const patterns = [
+      /[a-z0-9]{32}/,                          // Generic 32-char hash
+      /sk_(live|test)_[a-z0-9]{24}/i,           // Stripe
+      /[A-Z0-9]{20}:[A-Za-z0-9]{40}/i,          // AWS
+      /[a-z]{3}_[a-z0-9]{52}/i                  // Anthropic
+    ];
+    return patterns.some(p => p.test(text));
+  }
+}
+```
+
+### Dictionary System Implementation
+```javascript
+class ContextualDictionary {
+  constructor() {
+    this.base = ["password", "credentials", "ssn", "dob", ...];
+    this.finance = ["routing number", "swift code", "account #", ...];
+    this.health = ["phi", "hipaa", "medical record", ...];
+  }
+  
+  getRelevantDictionary(domain) {
+    const domainCategories = {
+      "bank": this.finance,
+      "health": this.health,
+      "insurance": [...this.finance, ...this.health]
+    };
+    
+    for (const [keyword, dict] of Object.entries(domainCategories)) {
+      if (domain.includes(keyword)) return [...this.base, ...dict];
+    }
+    return this.base;
+  }
+  
+  addCustomTerms(terms) {
+    this.custom = [...new Set([...this.custom || [], ...terms])];
+  }
+}
+```
+
+### LLM Integration Adapter
+```javascript
+class LLMGateway {
+  async scan(text, context) {
+    const prompt = `
+      Analyze the following text for sensitive information.
+      Context: ${context.domain} | Industry: ${context.industry}
+      Rules: ${JSON.stringify(context.customRules)}
+      
+      Text: """${text}"""
+      
+      Respond in JSON format:
+      {
+        "risk_score": 0.0-1.0,
+        "matches": [{"text": "...", "type": "...", "reason": "..."}],
+        "redacted_suggestion": "..."
+      }
+    `;
+    
+    const response = await fetch(LLM_ENDPOINT, {
+      method: "POST",
+      headers: { 
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ prompt })
+    });
+    
+    return this.normalizeResponse(await response.json());
+  }
+  
+  normalizeResponse(llmData) {
+    // Convert LLM output to standard format
+    return {
+      score: llmData.risk_score,
+      matches: llmData.matches,
+      redaction: llmData.redacted_suggestion
+    };
+  }
+}
+```
+
+## 3. Premium Features UI Mockups
+
+### Pro Tier Settings UI
+```mermaid
+graph TD
+    A[Settings Dashboard] --> B[Detection Settings]
+    A --> C[Custom Rules]
+    A --> D[LLM Configuration]
+    B --> E[Industry Presets<br>Healthcare/Finance/Legal]
+    B --> F[Sensitivity Slider]
+    C --> G[Regex Editor]
+    C --> H[Dictionary Manager]
+    D --> I[LLM Provider<br>OpenAI/Anthropic/Self-hosted]
+    D --> J[Privacy Settings]
+```
+
+### Enterprise Admin Portal
+```mermaid
+graph LR
+    A[Dashboard] --> B[Policy Management]
+    A --> C[User Activity]
+    A --> D[Compliance Reporting]
+    B --> E[Group Policies]
+    B --> F[Geofencing]
+    C --> G[Real-time Monitoring]
+    C --> H[Incident Investigation]
+    D --> I[GDPR Report]
+    D --> J[HIPAA Audit]
+    
+    style B fill:#4e8cff
+    style C fill:#ff6b6b
+    style D fill:#34d399
+```
+
+### UI Components
+1. **Custom Rules Editor**
+   - Live regex testing panel
+   - Dictionary import/export
+   - Rule performance metrics
+
+2. **LLM Configuration**
+   - Provider selection (OpenAI/Anthropic)
+   - Privacy controls:
+     - "No-log" mode
+     - Data retention settings
+   - Cost monitoring dashboard
+
+3. **Enterprise Policy Manager**
+   - Visual policy builder
+   - Group inheritance diagram
+   - Policy simulation sandbox
+
+## 4. Enterprise Deployment Playbook
+
+### Deployment Workflow
+```mermaid
+sequenceDiagram
+    participant IT as IT Admin
+    participant GP as GuardPasteAI
+    participant MDM as MDM System
+    participant AD as Active Directory
+    
+    IT->>GP: 1. Create Enterprise Account
+    GP->>IT: 2. Send Provisioning Package
+    IT->>MDM: 3. Upload Configuration
+    MDM->>AD: 4. Sync User Groups
+    AD->>MDM: 5. Group Membership Data
+    MDM->>Endpoint: 6. Deploy Extension
+    Endpoint->>GP: 7. Register Device
+    GP->>IT: 8. Deployment Complete Report
+```
+
+### Key Integration Points
+1. **Identity Provider Setup**
+   - SCIM 2.0 provisioning
+   - SAML SSO configuration
+   - Group synchronization
+
+2. **MDM Configuration**
+```xml
+<!-- Sample Intune Configuration -->
+<Policy>
+  <Extension id="com.guardpasteai.enterprise">
+    <Settings>
+      <PolicyUrl>https://company.guardpaste.ai/config</PolicyUrl>
+      <EnforcementLevel>block</EnforcementLevel>
+      <LLMEnabled>false</LLMEnabled>
+      <ReportingEndpoint>https://company.siem.system/logs</ReportingEndpoint>
+    </Settings>
+  </Extension>
+</Policy>
+```
+
+3. **Data Residency Options**
+   - Regional deployment packages:
+     - EU: Frankfurt AWS region
+     - US: Virginia AWS region
+     - APAC: Singapore AWS region
+   - On-premises option for air-gapped networks
+
+### Compliance Framework
+| Requirement | Implementation |
+|------------|---------------|
+| **GDPR** | Right to erasure workflow<br>EU data localization<br>DPA signing |
+| **HIPAA** | BAA with LLM providers<br>Audit trail for PHI detection<br>Break-glass access logs |
+| **SOC 2** | Automated evidence collection<br>Continuous monitoring<br>Third-party penetration tests |
+
+### Support Resources
+1. **Deployment Kits**
+   - Terraform scripts for cloud deployment
+   - PowerShell deployment modules
+   - Docker containers for on-prem
+
+2. **Training Materials**
+   - Interactive policy builder tutorial
+   - Compliance scenario simulations
+   - Phased rollout planner
+
+3. **Monitoring Tools**
+   - Deployment health dashboard
+   - Policy adoption metrics
+   - Automated compliance checker
+
+## Implementation Roadmap Addendum
+
+### Critical Path Items
+1. **Dictionary Compression Algorithm**  
+   - Technique: Bloom filters for efficient matching
+   - 10,000 terms → 12KB memory footprint
+   - O(1) lookup time complexity
+
+2. **LLM Fallback Mechanism**
+```javascript
+function getDetectionResult() {
+  try {
+    return await llmScan();
+  } catch (error) {
+    console.warn("LLM failed, using enhanced local scan");
+    return enhancedLocalScan();
+  }
+}
+
+function enhancedLocalScan() {
+  // Combine regex + dictionary + contextual analysis
+  // Add probabilistic scoring
+}
+```
+
+3. **Zero-Day Threat Response**
+   - Automated pattern extraction from support tickets
+   - Community pattern sharing (opt-in)
+   - Emergency policy updates via MDM
+
+Would you like me to expand on any specific component or provide executable code samples for particular subsystems?

@@ -57,7 +57,14 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["warning.html", "warning.css", "warning.js"],
+      "resources": [
+        "warning.html", 
+        "warning.css", 
+        "warning.js", 
+        "detection-engine.js", 
+        "llm-integration.js",
+        "enterprise-admin.js"
+      ],
       "matches": [
         "https://chat.openai.com/*",
         "https://claude.ai/*",

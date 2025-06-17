@@ -32,6 +32,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const orgName = document.getElementById('orgName');
   const teamId = document.getElementById('teamId');
   const centralLogging = document.getElementById('centralLogging');
+  
+  // Pro feature elements
+  const enableLLM = document.getElementById('enableLLM');
+  const llmConfig = document.getElementById('llmConfig');
+  const llmProvider = document.getElementById('llmProvider');
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const testApiBtn = document.getElementById('testApiBtn');
+  const detectionLevel = document.getElementById('detectionLevel');
+  const privacyMode = document.getElementById('privacyMode');
+  const customPatterns = document.getElementById('customPatterns');
+  const industryContext = document.getElementById('industryContext');
 
   let currentSettings = {};
   let currentLogs = [];
@@ -66,6 +77,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   orgName.addEventListener('input', handleEnterpriseConfigChange);
   teamId.addEventListener('input', handleEnterpriseConfigChange);
   centralLogging.addEventListener('change', handleEnterpriseConfigChange);
+  
+  // Pro feature event listeners
+  enableLLM.addEventListener('change', handleLLMToggle);
+  llmProvider.addEventListener('change', handleLLMConfigChange);
+  apiKeyInput.addEventListener('input', handleLLMConfigChange);
+  testApiBtn.addEventListener('click', handleTestAPI);
+  detectionLevel.addEventListener('change', handleLLMConfigChange);
+  privacyMode.addEventListener('change', handleLLMConfigChange);
+  customPatterns.addEventListener('input', handleCustomRulesChange);
+  industryContext.addEventListener('change', handleCustomRulesChange);
   
   // Add event listeners for individual generate buttons
   document.querySelectorAll('.generate-single-btn').forEach(btn => {
@@ -136,6 +157,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     orgName.value = enterprise.orgName || '';
     teamId.value = enterprise.teamId || '';
     centralLogging.checked = enterprise.centralLogging || false;
+    
+    // Pro features
+    const pro = currentSettings.pro || {};
+    enableLLM.checked = pro.enableLLM || false;
+    
+    // Update LLM config visibility
+    if (pro.enableLLM) {
+      llmConfig.classList.add('show');
+    } else {
+      llmConfig.classList.remove('show');
+    }
+    
+    // Populate pro values
+    llmProvider.value = pro.llmProvider || 'anthropic';
+    detectionLevel.value = pro.detectionLevel || 'medium';
+    privacyMode.checked = pro.privacyMode || false;
+    customPatterns.value = pro.customPatterns || '';
+    industryContext.value = pro.industryContext || 'general';
+    
+    // Load API key for current provider
+    loadApiKey();
     
     // Whitelist
     updateWhitelistDisplay();
@@ -584,6 +626,190 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (error) {
       console.error('Error updating enterprise config:', error);
+    }
+  }
+
+  // Handle LLM toggle
+  async function handleLLMToggle() {
+    const enabled = enableLLM.checked;
+    
+    // Update visibility of LLM config
+    if (enabled) {
+      llmConfig.classList.add('show');
+    } else {
+      llmConfig.classList.remove('show');
+    }
+
+    const pro = currentSettings.pro || {};
+    pro.enableLLM = enabled;
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: { pro }
+      });
+      
+      if (response.success) {
+        currentSettings.pro = pro;
+      } else {
+        console.error('Failed to update LLM setting:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating LLM setting:', error);
+    }
+  }
+
+  // Handle LLM configuration changes
+  async function handleLLMConfigChange() {
+    const pro = currentSettings.pro || {};
+    
+    pro.llmProvider = llmProvider.value;
+    pro.detectionLevel = detectionLevel.value;
+    pro.privacyMode = privacyMode.checked;
+
+    // Save API key separately for security
+    if (apiKeyInput.value) {
+      await saveApiKey(pro.llmProvider, apiKeyInput.value);
+    }
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: { pro }
+      });
+      
+      if (response.success) {
+        currentSettings.pro = pro;
+      } else {
+        console.error('Failed to update LLM config:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating LLM config:', error);
+    }
+  }
+
+  // Handle custom rules changes
+  async function handleCustomRulesChange() {
+    const pro = currentSettings.pro || {};
+    
+    pro.customPatterns = customPatterns.value;
+    pro.industryContext = industryContext.value;
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: { pro }
+      });
+      
+      if (response.success) {
+        currentSettings.pro = pro;
+      } else {
+        console.error('Failed to update custom rules:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating custom rules:', error);
+    }
+  }
+
+  // Test API key
+  async function handleTestAPI() {
+    const provider = llmProvider.value;
+    const apiKey = apiKeyInput.value;
+    
+    if (!apiKey) {
+      showNotification('Please enter an API key first', 'warning');
+      return;
+    }
+
+    testApiBtn.disabled = true;
+    testApiBtn.textContent = 'Testing...';
+
+    try {
+      const testResult = await testLLMConnection(provider, apiKey);
+      
+      if (testResult.success) {
+        showNotification('API connection successful', 'success');
+        await saveApiKey(provider, apiKey);
+      } else {
+        showNotification(`API test failed: ${testResult.error}`, 'error');
+      }
+    } catch (error) {
+      showNotification(`Connection error: ${error.message}`, 'error');
+    } finally {
+      testApiBtn.disabled = false;
+      testApiBtn.textContent = 'Test';
+    }
+  }
+
+  // Test LLM connection
+  async function testLLMConnection(provider, apiKey) {
+    const endpoints = {
+      anthropic: 'https://api.anthropic.com/v1/messages',
+      openai: 'https://api.openai.com/v1/chat/completions'
+    };
+
+    const headers = {
+      anthropic: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'anthropic-version': '2023-06-01'
+      },
+      openai: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      }
+    };
+
+    const testPayloads = {
+      anthropic: {
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 10,
+        messages: [{ role: 'user', content: 'Test' }]
+      },
+      openai: {
+        model: 'gpt-3.5-turbo',
+        max_tokens: 10,
+        messages: [{ role: 'user', content: 'Test' }]
+      }
+    };
+
+    try {
+      const response = await fetch(endpoints[provider], {
+        method: 'POST',
+        headers: headers[provider],
+        body: JSON.stringify(testPayloads[provider])
+      });
+
+      if (response.ok) {
+        return { success: true };
+      } else {
+        const error = await response.text();
+        return { success: false, error: `HTTP ${response.status}: ${error}` };
+      }
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Save API key securely
+  async function saveApiKey(provider, apiKey) {
+    await chrome.storage.sync.set({
+      [`${provider}_api_key`]: apiKey
+    });
+  }
+
+  // Load API key for current provider
+  async function loadApiKey() {
+    const provider = llmProvider.value;
+    const stored = await chrome.storage.sync.get([`${provider}_api_key`]);
+    const apiKey = stored[`${provider}_api_key`];
+    
+    if (apiKey) {
+      apiKeyInput.value = '••••••••••••';
+      apiKeyInput.dataset.hasKey = 'true';
+    } else {
+      apiKeyInput.value = '';
+      apiKeyInput.dataset.hasKey = 'false';
     }
   }
 

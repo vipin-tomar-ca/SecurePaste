@@ -167,6 +167,73 @@
       </div>
     </div>
 
+    <!-- Pro Features Section -->
+    <div class="pro-section" id="proSection">
+      <h3>Pro Features</h3>
+      <p class="section-description">Advanced AI-powered detection and custom rules</p>
+      
+      <div class="setting-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="enableLLM">
+          <span class="checkmark"></span>
+          Enable AI-powered detection
+        </label>
+        <span class="pro-badge">PRO</span>
+      </div>
+
+      <div class="llm-config" id="llmConfig">
+        <div class="setting-row">
+          <label for="llmProvider">AI Provider</label>
+          <select id="llmProvider">
+            <option value="anthropic">Anthropic Claude</option>
+            <option value="openai">OpenAI GPT</option>
+          </select>
+        </div>
+        
+        <div class="setting-row">
+          <label for="apiKeyInput">API Key</label>
+          <input type="password" id="apiKeyInput" placeholder="Enter your API key">
+          <button id="testApiBtn" class="secondary-btn">Test</button>
+        </div>
+        
+        <div class="setting-row">
+          <label for="detectionLevel">Detection Sensitivity</label>
+          <select id="detectionLevel">
+            <option value="low">Conservative</option>
+            <option value="medium">Balanced</option>
+            <option value="high">Aggressive</option>
+          </select>
+        </div>
+        
+        <div class="setting-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="privacyMode">
+            <span class="checkmark"></span>
+            Privacy-preserving mode
+          </label>
+        </div>
+      </div>
+
+      <div class="custom-rules-section" id="customRulesSection">
+        <h4>Custom Detection Rules</h4>
+        <div class="setting-row">
+          <label for="customPatterns">Custom Patterns (one per line)</label>
+          <textarea id="customPatterns" rows="4" placeholder="Enter regex patterns or keywords"></textarea>
+        </div>
+        
+        <div class="setting-row">
+          <label for="industryContext">Industry Context</label>
+          <select id="industryContext">
+            <option value="general">General</option>
+            <option value="healthcare">Healthcare</option>
+            <option value="finance">Finance</option>
+            <option value="tech">Technology</option>
+            <option value="legal">Legal</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <!-- Enterprise Section -->
     <div class="enterprise-section" id="enterpriseSection">
       <h3>Enterprise Configuration</h3>

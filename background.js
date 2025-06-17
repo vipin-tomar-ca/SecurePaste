@@ -235,7 +235,9 @@ async function handleGetSettings(sendResponse) {
       'logPreventions',
       'autoReplace',
       'enterprise',
-      'logging'
+      'logging',
+      'pro',
+      'userTier'
     ]);
     
     const logs = await chrome.storage.local.get(['preventionLogs']);
