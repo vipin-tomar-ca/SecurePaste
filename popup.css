@@ -225,6 +225,39 @@ input:checked + .slider:before {
   display: block;
 }
 
+.enterprise-section {
+  padding: 0 20px 20px;
+}
+
+.enterprise-config {
+  display: none;
+  margin-top: 10px;
+}
+
+.enterprise-config.show {
+  display: block;
+}
+
+.enterprise-config .setting-row {
+  margin-bottom: 8px;
+}
+
+.enterprise-config input[type="text"],
+.enterprise-config input[type="url"] {
+  width: 100%;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: white;
+}
+
+.enterprise-config input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
 .generator-actions {
   display: flex;
   gap: 8px;

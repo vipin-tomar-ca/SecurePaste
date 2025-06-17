@@ -26,6 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const exportSettingsBtn = document.getElementById('exportSettingsBtn');
   const generateAllBtn = document.getElementById('generateAllBtn');
   const resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
+  const enterpriseEnabled = document.getElementById('enterpriseEnabled');
+  const enterpriseConfig = document.getElementById('enterpriseConfig');
+  const webhookUrl = document.getElementById('webhookUrl');
+  const orgName = document.getElementById('orgName');
+  const teamId = document.getElementById('teamId');
+  const centralLogging = document.getElementById('centralLogging');
 
   let currentSettings = {};
   let currentLogs = [];
@@ -55,6 +61,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   exportSettingsBtn.addEventListener('click', handleExportSettings);
   generateAllBtn.addEventListener('click', handleGenerateAll);
   resetDefaultsBtn.addEventListener('click', handleResetDefaults);
+  enterpriseEnabled.addEventListener('change', handleEnterpriseToggle);
+  webhookUrl.addEventListener('input', handleEnterpriseConfigChange);
+  orgName.addEventListener('input', handleEnterpriseConfigChange);
+  teamId.addEventListener('input', handleEnterpriseConfigChange);
+  centralLogging.addEventListener('change', handleEnterpriseConfigChange);
   
   // Add event listeners for individual generate buttons
   document.querySelectorAll('.generate-single-btn').forEach(btn => {
@@ -108,6 +119,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     phoneReplace.value = autoReplace.phone || '';
     apiKeyReplace.value = autoReplace.apiKey || '';
     passwordReplace.value = autoReplace.password || '';
+    
+    // Enterprise settings
+    const enterprise = currentSettings.enterprise || {};
+    enterpriseEnabled.checked = enterprise.enabled || false;
+    
+    // Update enterprise config visibility
+    if (enterprise.enabled) {
+      enterpriseConfig.classList.add('show');
+    } else {
+      enterpriseConfig.classList.remove('show');
+    }
+    
+    // Populate enterprise values
+    webhookUrl.value = enterprise.webhookUrl || '';
+    orgName.value = enterprise.orgName || '';
+    teamId.value = enterprise.teamId || '';
+    centralLogging.checked = enterprise.centralLogging || false;
     
     // Whitelist
     updateWhitelistDisplay();
@@ -502,6 +530,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         notification.remove();
       }
     }, 2000);
+  }
+
+  // Handle enterprise toggle
+  async function handleEnterpriseToggle() {
+    const enabled = enterpriseEnabled.checked;
+    
+    // Update visibility of enterprise config
+    if (enabled) {
+      enterpriseConfig.classList.add('show');
+    } else {
+      enterpriseConfig.classList.remove('show');
+    }
+
+    const enterprise = currentSettings.enterprise || {};
+    enterprise.enabled = enabled;
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: { enterprise }
+      });
+      
+      if (response.success) {
+        currentSettings.enterprise = enterprise;
+      } else {
+        console.error('Failed to update enterprise setting:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating enterprise setting:', error);
+    }
+  }
+
+  // Handle enterprise configuration changes
+  async function handleEnterpriseConfigChange() {
+    const enterprise = currentSettings.enterprise || {};
+    
+    enterprise.webhookUrl = webhookUrl.value;
+    enterprise.orgName = orgName.value;
+    enterprise.teamId = teamId.value;
+    enterprise.centralLogging = centralLogging.checked;
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: { enterprise }
+      });
+      
+      if (response.success) {
+        currentSettings.enterprise = enterprise;
+      } else {
+        console.error('Failed to update enterprise config:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating enterprise config:', error);
+    }
   }
 
   // Utility functions
