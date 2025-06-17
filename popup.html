@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensitive Data Paste Guard</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="title-section">
+        <h1>🛡️ Paste Guard</h1>
+        <p class="subtitle">Protecting your sensitive data</p>
+      </div>
+      <div class="toggle-section">
+        <label class="toggle-switch">
+          <input type="checkbox" id="extensionToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Status Section -->
+    <div class="status-section">
+      <div class="status-card" id="statusCard">
+        <div class="status-icon">⚡</div>
+        <div class="status-info">
+          <h3 id="statusTitle">Extension Active</h3>
+          <p id="statusDescription">Monitoring paste events on AI tools</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section">
+      <h3>Recent Activity</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number" id="todayBlocked">0</div>
+          <div class="stat-label">Blocked Today</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="totalBlocked">0</div>
+          <div class="stat-label">Total Blocked</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Section -->
+    <div class="settings-section">
+      <h3>Detection Settings</h3>
+      
+      <div class="setting-row">
+        <label for="sensitivitySelect">Detection Sensitivity</label>
+        <select id="sensitivitySelect">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="discreetWarnings">
+          <span class="checkmark"></span>
+          Show discreet warnings for typed content
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="logPreventions">
+          <span class="checkmark"></span>
+          Log prevention events
+        </label>
+      </div>
+    </div>
+
+    <!-- Whitelist Section -->
+    <div class="whitelist-section">
+      <h3>Trusted Sites</h3>
+      <div class="input-group">
+        <input type="text" id="whitelistInput" placeholder="Enter domain (e.g., example.com)">
+        <button id="addWhitelistBtn">Add</button>
+      </div>
+      <div class="whitelist-items" id="whitelistItems">
+        <!-- Whitelist items will be populated here -->
+      </div>
+    </div>
+
+    <!-- Recent Logs Section -->
+    <div class="logs-section">
+      <h3>Recent Preventions</h3>
+      <div class="logs-container" id="logsContainer">
+        <p class="no-logs">No recent preventions</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <button id="clearLogsBtn" class="secondary-btn">Clear Logs</button>
+      <button id="exportSettingsBtn" class="secondary-btn">Export Settings</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

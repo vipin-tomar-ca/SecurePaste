@@ -1,0 +1,75 @@
+{
+  "manifest_version": 3,
+  "name": "Sensitive Data Paste Guard",
+  "version": "1.0.0",
+  "description": "Prevents pasting sensitive information into AI tools by detecting patterns and showing warnings",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://bard.google.com/*",
+    "https://poe.com/*",
+    "https://character.ai/*",
+    "https://huggingface.co/*",
+    "https://replicate.com/*",
+    "https://cohere.ai/*",
+    "https://anthropic.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://bard.google.com/*",
+        "https://poe.com/*",
+        "https://character.ai/*",
+        "https://huggingface.co/*",
+        "https://replicate.com/*",
+        "https://cohere.ai/*",
+        "https://anthropic.com/*"
+      ],
+      "js": ["patterns.js", "content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Sensitive Data Paste Guard Settings",
+    "default_icon": {
+      "16": "icons/icon16.svg",
+      "48": "icons/icon48.svg",
+      "128": "icons/icon128.svg"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.svg",
+    "48": "icons/icon48.svg",
+    "128": "icons/icon128.svg"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["warning.html", "warning.css", "warning.js"],
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://bard.google.com/*",
+        "https://poe.com/*",
+        "https://character.ai/*",
+        "https://huggingface.co/*",
+        "https://replicate.com/*",
+        "https://cohere.ai/*",
+        "https://anthropic.com/*"
+      ]
+    }
+  ]
+}
