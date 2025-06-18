@@ -245,6 +245,74 @@
           </select>
         </div>
       </div>
+
+      <!-- Warning Customization Section -->
+      <div class="warning-config-section">
+        <h4>Warning Customization</h4>
+        
+        <div class="setting-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="useAnimatedWarnings" checked>
+            <span class="checkmark"></span>
+            Use animated warnings
+          </label>
+        </div>
+        
+        <div class="warning-intensity-config" id="warningIntensityConfig">
+          <div class="setting-row">
+            <label for="warningIntensity">Warning Intensity</label>
+            <select id="warningIntensity">
+              <option value="subtle">Subtle - Gentle notifications</option>
+              <option value="moderate" selected>Moderate - Balanced alerts</option>
+              <option value="aggressive">Aggressive - Strong warnings</option>
+              <option value="critical">Critical - Maximum urgency</option>
+            </select>
+          </div>
+          
+          <div class="intensity-preview" id="intensityPreview">
+            <div class="preview-card">
+              <div class="preview-title">Preview</div>
+              <div class="preview-description">Click to test warning intensity</div>
+              <button id="testWarningBtn" class="test-btn">Test Warning</button>
+            </div>
+          </div>
+          
+          <div class="setting-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="warningAudioEnabled" checked>
+              <span class="checkmark"></span>
+              Enable warning sounds
+            </label>
+          </div>
+          
+          <div class="advanced-warning-settings">
+            <h5>Advanced Settings</h5>
+            
+            <div class="setting-row">
+              <label for="warningDuration">Warning Duration (seconds)</label>
+              <input type="range" id="warningDuration" min="2" max="10" value="3" step="1">
+              <span class="range-value" id="durationValue">3s</span>
+            </div>
+            
+            <div class="setting-row">
+              <label for="animationSpeed">Animation Speed</label>
+              <select id="animationSpeed">
+                <option value="slow">Slow</option>
+                <option value="normal" selected>Normal</option>
+                <option value="fast">Fast</option>
+              </select>
+            </div>
+            
+            <div class="setting-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="progressiveWarnings" checked>
+                <span class="checkmark"></span>
+                Progressive intensity based on risk
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Enterprise Section -->

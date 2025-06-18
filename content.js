@@ -7,6 +7,7 @@
   let pendingPasteEvent = null;
   let detectionEngine = null;
   let llmIntegration = null;
+  let animatedWarning = null;
 
   // Initialize extension with hybrid detection engine
   async function init() {
@@ -22,6 +23,11 @@
         window.dictionaryManager = new DictionaryManager();
         // Load compressed dictionaries for fast lookup
         await window.dictionaryManager.loadDictionaries(detectionEngine?.dictionaries || {});
+      }
+      if (typeof AnimatedWarning !== 'undefined') {
+        animatedWarning = new AnimatedWarning();
+        // Load warning CSS styles
+        this.loadWarningStyles();
       }
       
       // Get current settings
@@ -129,6 +135,63 @@
     }
   }
 
+  // Load warning CSS styles
+  function loadWarningStyles() {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = chrome.runtime.getURL('animated-warning.css');
+    document.head.appendChild(link);
+  }
+
+  // Show animated warning with customizable intensity
+  async function showAnimatedWarning(target, detectedPatterns, text, analysisResult) {
+    if (!animatedWarning) return;
+
+    const warningIntensity = currentSettings.warningIntensity || 'moderate';
+    
+    // Configure warning based on user settings
+    if (currentSettings.warningAudioEnabled !== undefined) {
+      animatedWarning.setAudioEnabled(currentSettings.warningAudioEnabled);
+    }
+
+    // Show progressive warning that escalates based on risk
+    const warningId = animatedWarning.showProgressiveWarning(target, detectedPatterns, {
+      intensity: warningIntensity,
+      showReview: true,
+      onDismiss: () => {
+        // User dismissed warning - log event but don't proceed
+        chrome.runtime.sendMessage({
+          action: 'logPrevention',
+          data: {
+            action: 'dismissed',
+            patterns: detectedPatterns,
+            domain: window.location.hostname,
+            riskScore: analysisResult.riskScore
+          }
+        });
+      },
+      onReview: () => {
+        // User wants to review - show detailed warning dialog
+        showWarningDialog(detectedPatterns, text, analysisResult);
+      }
+    });
+
+    // Auto-log the warning event
+    chrome.runtime.sendMessage({
+      action: 'logPrevention',
+      data: {
+        action: 'warned',
+        patterns: detectedPatterns,
+        domain: window.location.hostname,
+        riskScore: analysisResult.riskScore,
+        warningId: warningId,
+        intensity: warningIntensity
+      }
+    });
+
+    return warningId;
+  }
+
   // Setup paste event monitoring
   function setupPasteMonitoring() {
     document.addEventListener('paste', handlePasteEvent, true);
@@ -186,8 +249,13 @@
           originalEvent: event
         };
 
-        // Show warning dialog
-        await showWarningDialog(detectedPatterns, pastedText);
+        // Show animated warning based on user preferences
+        if (currentSettings.useAnimatedWarnings !== false && animatedWarning) {
+          await showAnimatedWarning(event.target, analysisResult.detectedPatterns, pastedText, analysisResult);
+        } else {
+          // Fallback to traditional warning dialog
+          await showWarningDialog(analysisResult.detectedPatterns, pastedText, analysisResult);
+        }
       }
     } catch (error) {
       console.error('Sensitive Data Paste Guard: Paste handling failed', error);
