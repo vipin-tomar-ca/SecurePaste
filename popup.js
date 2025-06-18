@@ -44,6 +44,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const customPatterns = document.getElementById('customPatterns');
   const industryContext = document.getElementById('industryContext');
   
+  // Warning customization elements
+  const useAnimatedWarnings = document.getElementById('useAnimatedWarnings');
+  const warningIntensityConfig = document.getElementById('warningIntensityConfig');
+  const warningIntensity = document.getElementById('warningIntensity');
+  const testWarningBtn = document.getElementById('testWarningBtn');
+  const warningAudioEnabled = document.getElementById('warningAudioEnabled');
+  const warningDuration = document.getElementById('warningDuration');
+  const durationValue = document.getElementById('durationValue');
+  const animationSpeed = document.getElementById('animationSpeed');
+  const progressiveWarnings = document.getElementById('progressiveWarnings');
+  
   // Tier management elements
   const tierBadge = document.getElementById('tierBadge');
   const upgradeSection = document.getElementById('upgradeSection');
@@ -94,6 +105,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   privacyMode.addEventListener('change', handleLLMConfigChange);
   customPatterns.addEventListener('input', handleCustomRulesChange);
   industryContext.addEventListener('change', handleCustomRulesChange);
+  
+  // Warning customization event listeners
+  useAnimatedWarnings.addEventListener('change', handleWarningToggle);
+  warningIntensity.addEventListener('change', handleWarningConfigChange);
+  testWarningBtn.addEventListener('click', handleTestWarning);
+  warningAudioEnabled.addEventListener('change', handleWarningConfigChange);
+  warningDuration.addEventListener('input', handleDurationChange);
+  animationSpeed.addEventListener('change', handleWarningConfigChange);
+  progressiveWarnings.addEventListener('change', handleWarningConfigChange);
   
   // Tier management event listeners
   upgradeProBtn.addEventListener('click', handleUpgradePro);
@@ -194,6 +214,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Load API key for current provider
     loadApiKey();
+    
+    // Warning configuration
+    const warnings = currentSettings.warnings || {};
+    useAnimatedWarnings.checked = warnings.useAnimatedWarnings !== false;
+    warningIntensity.value = warnings.intensity || 'moderate';
+    warningAudioEnabled.checked = warnings.audioEnabled !== false;
+    warningDuration.value = warnings.duration || 3;
+    durationValue.textContent = `${warnings.duration || 3}s`;
+    animationSpeed.value = warnings.animationSpeed || 'normal';
+    progressiveWarnings.checked = warnings.progressive !== false;
+    
+    // Update warning config visibility
+    if (warnings.useAnimatedWarnings !== false) {
+      warningIntensityConfig.classList.remove('hidden');
+    } else {
+      warningIntensityConfig.classList.add('hidden');
+    }
     
     // Update tier display and upgrade prompts
     updateTierDisplay(currentSettings.userTier || 'free');
@@ -886,6 +923,153 @@ document.addEventListener('DOMContentLoaded', async () => {
     chrome.tabs.create({
       url: 'https://guardpasteai.com/enterprise/contact'
     });
+  }
+
+  // Handle warning toggle
+  async function handleWarningToggle() {
+    const enabled = useAnimatedWarnings.checked;
+    
+    // Update visibility of warning config
+    if (enabled) {
+      warningIntensityConfig.classList.remove('hidden');
+    } else {
+      warningIntensityConfig.classList.add('hidden');
+    }
+
+    const warnings = currentSettings.warnings || {};
+    warnings.useAnimatedWarnings = enabled;
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: { warnings }
+      });
+      
+      if (response.success) {
+        currentSettings.warnings = warnings;
+      } else {
+        console.error('Failed to update warning setting:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating warning setting:', error);
+    }
+  }
+
+  // Handle warning configuration changes
+  async function handleWarningConfigChange() {
+    const warnings = currentSettings.warnings || {};
+    
+    warnings.intensity = warningIntensity.value;
+    warnings.audioEnabled = warningAudioEnabled.checked;
+    warnings.duration = parseInt(warningDuration.value);
+    warnings.animationSpeed = animationSpeed.value;
+    warnings.progressive = progressiveWarnings.checked;
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: { warnings }
+      });
+      
+      if (response.success) {
+        currentSettings.warnings = warnings;
+      } else {
+        console.error('Failed to update warning config:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating warning config:', error);
+    }
+  }
+
+  // Handle duration slider change
+  function handleDurationChange() {
+    const value = warningDuration.value;
+    durationValue.textContent = `${value}s`;
+    handleWarningConfigChange();
+  }
+
+  // Test warning with current settings
+  async function handleTestWarning() {
+    const intensity = warningIntensity.value;
+    const audioEnabled = warningAudioEnabled.checked;
+    
+    // Create test animated warning
+    const testWarning = document.createElement('div');
+    testWarning.className = `intensity-demo warning-intensity-${intensity}`;
+    testWarning.innerHTML = `
+      <div class="demo-icon">⚠️</div>
+      <div class="demo-title">Test Warning - ${intensity.charAt(0).toUpperCase() + intensity.slice(1)}</div>
+      <div class="demo-message">This is how warnings will appear</div>
+    `;
+    
+    document.body.appendChild(testWarning);
+    
+    // Apply intensity-specific styling
+    const configs = {
+      subtle: { duration: 2000, glow: 0.3 },
+      moderate: { duration: 3000, glow: 0.6 },
+      aggressive: { duration: 4000, glow: 1.0 },
+      critical: { duration: 5000, glow: 1.5 }
+    };
+    
+    const config = configs[intensity];
+    
+    // Add entrance animation
+    testWarning.style.opacity = '0';
+    testWarning.style.transform = 'translate(-50%, -50%) scale(0.8)';
+    testWarning.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    
+    setTimeout(() => {
+      testWarning.style.opacity = '1';
+      testWarning.style.transform = 'translate(-50%, -50%) scale(1)';
+    }, 50);
+    
+    // Play test sound if enabled
+    if (audioEnabled) {
+      playTestSound(intensity);
+    }
+    
+    // Auto-dismiss
+    setTimeout(() => {
+      testWarning.style.opacity = '0';
+      testWarning.style.transform = 'translate(-50%, -50%) scale(0.8)';
+      setTimeout(() => {
+        if (testWarning.parentNode) {
+          testWarning.parentNode.removeChild(testWarning);
+        }
+      }, 300);
+    }, config.duration);
+  }
+
+  // Play test sound for warning
+  function playTestSound(intensity) {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      const frequencies = {
+        subtle: 400,
+        moderate: 300,
+        aggressive: 200,
+        critical: 150
+      };
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(frequencies[intensity], audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      console.log('Audio test not available:', error);
+    }
   }
 
   // Utility functions

@@ -53,8 +53,11 @@
       // Load emergency patterns if any
       await loadEmergencyPatterns();
       
+      // Configure animated warnings based on user settings
+      configureAnimatedWarning();
+      
       setupPasteMonitoring();
-      console.log('GuardPasteAI: Hybrid detection engine initialized');
+      console.log('GuardPasteAI: Hybrid detection engine with animated warnings initialized');
     } catch (error) {
       console.error('GuardPasteAI: Initialization failed', error);
     }
@@ -141,6 +144,35 @@
     link.rel = 'stylesheet';
     link.href = chrome.runtime.getURL('animated-warning.css');
     document.head.appendChild(link);
+  }
+
+  // Configure animated warning based on user settings
+  function configureAnimatedWarning() {
+    if (!animatedWarning || !currentSettings.warnings) return;
+
+    const warnings = currentSettings.warnings;
+    
+    // Configure audio
+    animatedWarning.setAudioEnabled(warnings.audioEnabled !== false);
+    
+    // Configure custom intensity settings if provided
+    if (warnings.customIntensityConfig) {
+      Object.entries(warnings.customIntensityConfig).forEach(([level, config]) => {
+        animatedWarning.configureIntensity(level, config);
+      });
+    }
+    
+    // Apply animation speed multiplier
+    const speedMultipliers = { slow: 1.5, normal: 1.0, fast: 0.7 };
+    const speedMultiplier = speedMultipliers[warnings.animationSpeed] || 1.0;
+    
+    if (speedMultiplier !== 1.0) {
+      Object.keys(animatedWarning.intensityConfigs).forEach(level => {
+        const config = animatedWarning.intensityConfigs[level];
+        config.pulseSpeed *= speedMultiplier;
+        config.duration = Math.max(1000, config.duration * (2 - speedMultiplier));
+      });
+    }
   }
 
   // Show animated warning with customizable intensity

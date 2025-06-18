@@ -34,7 +34,7 @@
         "https://cohere.ai/*",
         "https://anthropic.com/*"
       ],
-      "js": ["patterns.js", "data-generator.js", "dictionary-compression.js", "detection-engine.js", "llm-integration.js", "enterprise-deployment.js", "feature-gates.js", "content.js"],
+      "js": ["patterns.js", "data-generator.js", "dictionary-compression.js", "detection-engine.js", "llm-integration.js", "enterprise-deployment.js", "feature-gates.js", "animated-warning.js", "content.js"],
       "run_at": "document_start"
     }
   ],
@@ -63,7 +63,9 @@
         "warning.js", 
         "detection-engine.js", 
         "llm-integration.js",
-        "enterprise-admin.js"
+        "enterprise-admin.js",
+        "animated-warning.js",
+        "animated-warning.css"
       ],
       "matches": [
         "https://chat.openai.com/*",
