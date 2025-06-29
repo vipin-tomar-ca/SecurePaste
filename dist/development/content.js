@@ -578,9 +578,9 @@
     } else {
       console.error('GuardPasteAI: No editable content found');
       alert('GuardPasteAI: No edited text found. Please try again.');
-        return;
-      }
-      
+      return;
+    }
+    
     // Copy text to clipboard
     copyToClipboard(textToCopy).then(() => {
       console.log('GuardPasteAI: Edited text copied to clipboard successfully');
@@ -620,8 +620,8 @@
     } else {
       console.error('GuardPasteAI: No original text found');
       alert('GuardPasteAI: No original text found. Please try again.');
-          return;
-        }
+      return;
+    }
     
     // Copy text to clipboard
     copyToClipboard(originalText).then(() => {
@@ -1145,8 +1145,8 @@
     await loadExtensionState();
     
     // Load emergency patterns
-      await loadEmergencyPatterns();
-      
+    await loadEmergencyPatterns();
+    
     // Load external modules
     await loadExternalModules();
     
@@ -1157,10 +1157,10 @@
     loadWarningStyles();
     
     // Configure animated warning
-      configureAnimatedWarning();
-      
+    configureAnimatedWarning();
+    
     // Setup paste monitoring
-      setupPasteMonitoring();
+    setupPasteMonitoring();
     
     console.log('GuardPasteAI: Extension initialized successfully');
   }
@@ -1299,7 +1299,7 @@
           url: window.location.href,
           timestamp: Date.now(),
           detectedPatterns: detectedPatterns.map(p => ({ type: p.name.toLowerCase(), value: p.matches[0] })),
-            action: 'dismissed',
+          action: 'dismissed',
           contentHash: generateContentHash(text)
         });
       },
@@ -1315,7 +1315,7 @@
       url: window.location.href,
       timestamp: Date.now(),
       detectedPatterns: detectedPatterns.map(p => ({ type: p.name.toLowerCase(), value: p.matches[0] })),
-        action: 'warned',
+      action: 'warned',
       contentHash: generateContentHash(text)
     });
 
@@ -2005,16 +2005,16 @@
       // Clean up popups
       const warningDialog = document.getElementById('warning-dialog');
       const simplePopup = document.getElementById('simple-paste-popup');
-
-    if (warningDialog) {
-      warningDialog.remove();
-    }
+      
+      if (warningDialog) {
+        warningDialog.remove();
+      }
       if (simplePopup) {
         simplePopup.remove();
       }
       
       // Reset global variables
-    pendingPasteEvent = null;
+      pendingPasteEvent = null;
       window.lastPasteTarget = null;
       window.lastPastedText = null;
       
@@ -2059,16 +2059,16 @@
       // Clean up popups
       const warningDialog = document.getElementById('warning-dialog');
       const simplePopup = document.getElementById('simple-paste-popup');
-
-    if (warningDialog) {
-      warningDialog.remove();
-    }
+      
+      if (warningDialog) {
+        warningDialog.remove();
+      }
       if (simplePopup) {
         simplePopup.remove();
       }
       
       // Reset global variables
-    pendingPasteEvent = null;
+      pendingPasteEvent = null;
       window.lastPasteTarget = null;
       window.lastPastedText = null;
       
@@ -2100,7 +2100,7 @@
       // Focus the target element first
       target.focus();
       
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
         console.log('GuardPasteAI: Inserting into INPUT/TEXTAREA element');
         
         // For input/textarea, replace the entire value
@@ -2116,7 +2116,7 @@
         console.log('GuardPasteAI: Text insertion completed successfully for INPUT/TEXTAREA');
         return true;
         
-    } else if (target.contentEditable === 'true') {
+      } else if (target.contentEditable === 'true') {
         console.log('GuardPasteAI: Inserting into contentEditable element');
         
         // For contentEditable, clear and set content
@@ -2125,7 +2125,7 @@
         
         // Set cursor to end
         const range = document.createRange();
-      const selection = window.getSelection();
+        const selection = window.getSelection();
         range.selectNodeContents(target);
         range.collapse(false);
         selection.removeAllRanges();
@@ -2191,7 +2191,7 @@
         // Strategy 5: Try to set value directly if the element has a value property
         if (target.value !== undefined) {
           target.value = text;
-    target.dispatchEvent(new Event('input', { bubbles: true }));
+          target.dispatchEvent(new Event('input', { bubbles: true }));
           target.dispatchEvent(new Event('change', { bubbles: true }));
           console.log('GuardPasteAI: Text insertion completed successfully using direct value set');
           return true;
@@ -2515,8 +2515,8 @@
               replacementValue = '[***]';
             }
             
-              for (const match of pattern.matches) {
-                replacedText = replacedText.replace(match, replacementValue);
+            for (const match of pattern.matches) {
+              replacedText = replacedText.replace(match, replacementValue);
             }
           }
 

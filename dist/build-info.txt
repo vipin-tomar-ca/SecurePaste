@@ -1,0 +1,81 @@
+GuardPasteAI Chrome Extension Build
+===================================
+
+Build Number: 1750806412
+Build Date: 2025-06-24 18:06:52
+Version: 1.0.0.1750806412
+Manifest Version: 3
+
+Files Included:
+build/animated-warning.css
+build/animated-warning.js
+build/background.js
+build/config/rules.json
+build/content.js
+build/data-generator.js
+build/detection-engine.js
+build/dictionary-compression.js
+build/enterprise-admin.js
+build/enterprise-deployment.js
+build/feature-gates.js
+build/icons/icon128.png
+build/icons/icon128.svg
+build/icons/icon16.png
+build/icons/icon16.svg
+build/icons/icon48.png
+build/icons/icon48.svg
+build/llm-integration.js
+build/manifest.json
+build/manifest.json.bak
+build/patterns.js
+build/popup.css
+build/popup.html
+build/popup.js
+build/warning.css
+build/warning.html
+build/warning.js
+
+Total Files:       27
+Package Size: 336K
+
+Icons Available:
+total 552
+drwxr-xr-x@  8 vipintomar  staff     256 Jun 24 18:06 .
+drwxr-xr-x@ 24 vipintomar  staff     768 Jun 24 18:06 ..
+-rw-r--r--@  1 vipintomar  staff  260718 Jun 24 18:06 icon128.png
+-rw-r--r--@  1 vipintomar  staff    1599 Jun 24 18:06 icon128.svg
+-rw-r--r--@  1 vipintomar  staff     328 Jun 24 18:06 icon16.png
+-rw-r--r--@  1 vipintomar  staff     325 Jun 24 18:06 icon16.svg
+-rw-r--r--@  1 vipintomar  staff     917 Jun 24 18:06 icon48.png
+-rw-r--r--@  1 vipintomar  staff     711 Jun 24 18:06 icon48.svg
+
+Installation:
+1. Open Chrome and go to chrome://extensions/
+2. Enable "Developer mode"
+3. Click "Load unpacked" and select the development folder
+4. Or drag the ZIP file to chrome://extensions/ for installation
+
+Target Domains:
+- chat.openai.com
+- claude.ai
+- gemini.google.com
+- bard.google.com
+- poe.com
+- character.ai
+- huggingface.co
+- replicate.com
+- cohere.ai
+- anthropic.com
+
+Features:
+- Sensitive data detection
+- Animated warnings
+- Enterprise features
+- Custom rules support
+- Webhook integration
+- Unique build numbers to prevent caching
+
+Build Notes:
+- This build includes unique version number to prevent Chrome caching
+- Icons are optimized for better visibility
+- All security features are enabled

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensitive Data Warning</title>
+  <link rel="stylesheet" href="warning.css">
+</head>
+<body>
+  <div class="warning-container">
+    <div class="warning-header">
+      <div class="warning-icon">⚠️</div>
+      <h2>Sensitive Data Detected</h2>
+    </div>
+    
+    <div class="warning-content">
+      <p class="warning-message">
+        We've detected potentially sensitive information in your clipboard that you're about to paste into an AI tool.
+      </p>
+      
+      <div class="detected-types" id="detectedTypes">
+        <!-- Detected patterns will be inserted here -->
+      </div>
+      
+      <div class="data-preview">
+        <details>
+          <summary>View clipboard content</summary>
+          <div class="preview-content" id="previewContent">
+            <!-- Preview will be inserted here -->
+          </div>
+        </details>
+      </div>
+      
+      <div class="warning-notice">
+        <strong>Important:</strong> AI tools may store and process the data you share. Consider removing or masking sensitive information before proceeding.
+      </div>
+    </div>
+    
+    <div class="warning-actions">
+      <button class="btn-secondary" id="cancelBtn">Cancel Paste</button>
+      <button class="btn-primary" id="proceedBtn">Proceed Anyway</button>
+    </div>
+  </div>
+  
+  <script src="warning.js"></script>
+</body>
+</html>

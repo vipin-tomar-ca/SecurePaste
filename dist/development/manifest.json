@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GuardPasteAI",
-  "version": "1.0.0",
+  "version": "1.0.0.1750806412",
   "description": "Protects against pasting sensitive data into AI tools with intelligent detection and warnings",
   "permissions": [
     "storage",

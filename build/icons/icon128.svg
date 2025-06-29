@@ -1,0 +1,31 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" rx="20" fill="url(#gradient)"/>
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Shield background -->
+  <path d="M64 16L84 48H44L64 16Z" fill="white"/>
+  <circle cx="64" cy="72" r="6.4" fill="white"/>
+  <rect x="59.2" y="81.6" width="9.6" height="24" rx="4.8" fill="white"/>
+  
+  <!-- Data protection elements -->
+  <rect x="32" y="96" width="64" height="16" rx="8" fill="white" fill-opacity="0.9"/>
+  <rect x="40" y="101" width="16" height="6" rx="3" fill="#667eea"/>
+  <rect x="60" y="101" width="12" height="6" rx="3" fill="#667eea"/>
+  <rect x="76" y="101" width="12" height="6" rx="3" fill="#667eea"/>
+  
+  <!-- Additional security indicators -->
+  <circle cx="24" cy="32" r="8" fill="white" fill-opacity="0.3"/>
+  <path d="M24 28L26 30L30 26" stroke="#667eea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <circle cx="104" cy="32" r="8" fill="white" fill-opacity="0.3"/>
+  <path d="M104 28L106 30L110 26" stroke="#667eea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Lock icon at bottom -->
+  <rect x="54" y="108" width="20" height="12" rx="2" fill="white" fill-opacity="0.7"/>
+  <path d="M58 108V104C58 101.791 59.791 100 62 100H66C68.209 100 70 101.791 70 104V108" stroke="#667eea" stroke-width="2" fill="none"/>
+</svg>
